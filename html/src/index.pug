@@ -151,7 +151,7 @@ html
                     template(#tool)
                         div(style="margin:0 0 10px;display:flex;align-items:center")
                             el-select(v-model="gameLogTable.filters[0].value" multiple clearable collapse-tags style="flex:1" placeholder="Filter")
-                                el-option(v-once v-for="type in ['Location', 'OnPlayerJoined', 'OnPlayerLeft', 'Notification']" :key="type" :label="type" :value="type")
+                                el-option(v-once v-for="type in ['Location', 'OnPlayerJoined', 'OnPlayerLeft', 'Notification', 'VideoChange']" :key="type" :label="type" :value="type")
                             el-input(v-model="gameLogTable.filters[1].value" placeholder="Search" style="flex:none;width:150px;margin:0 10px")
                             el-button(type="default" @click="resetGameLog()" icon="el-icon-refresh" circle style="flex:none")
                     el-table-column(type="expand")
@@ -168,6 +168,7 @@ html
                     el-table-column(label="Detail" prop="data")
                         template(v-once #default="scope")
                             location(v-if="scope.row.type === 'Location'" :location="scope.row.data")
+                            span.x-link(v-else-if="scope.row.type === 'VideoChange'" @click="openExternalLink(scope.row.videoChange.videoURL)" v-text="getVideoName(scope.row.videoChange)")
                             span.x-link(v-else-if="scope.row.type !== 'Notification'" v-text="scope.row.data" @click="lookupUser(scope.row.data)")
 
             //- search
@@ -520,6 +521,17 @@ html
                     div(style="font-size:12px;margin-top:5px")
                         span(style="display:inline-block;min-width:150px") Close to tray
                         el-switch(v-model="isCloseToTray")
+                div(style="margin-top:30px")
+                    span(style="font-weight:bold") PyPyDance Companion Fork Options
+                    div(style="font-size:12px;margin-top:5px")
+                        span(style="display:inline-block;min-width:350px") Display progress pie overlay for videos
+                        el-switch(v-model="progressPie")
+                    div(style="font-size:12px;margin-top:5px")
+                        span(style="display:inline-block;min-width:350px") Notification on video change 
+                        el-switch(v-model="videoNotification")
+                    div(style="font-size:12px;margin-top:5px")
+                        span(style="display:inline-block;min-width:350px") Normalize video volume using Windows Volume Mixer
+                        el-switch(v-model="volumeNormalize")
                 div(style="margin-top:45px;border-top:1px solid #eee;padding-top:30px")
                     span(style="font-weight:bold") Legal Notice
                     div(style="margin-top:5px;font-size:12px")
@@ -684,6 +696,7 @@ html
                                         template(#default v-if="userDialog.instance.occupants") ({{ userDialog.instance.occupants }})
                                     launch(:location="userDialog.ref.location" style="margin-left:5px")
                                     invite-yourself(:location="userDialog.ref.location" style="margin-left:5px")
+                                    el-button(@click="copyUrl(userDialog.ref.location)" size="mini" icon="el-icon-link" style="margin-left:5px" circle)
                                 .x-friend-list(style="flex:1;margin-top:10px")
                                     .x-friend-item(v-if="userDialog.$location.userId" @click="showUserDialog(userDialog.$location.userId)")
                                         template(v-if="userDialog.$location.user")
@@ -808,6 +821,7 @@ html
                                     span.x-link(@click="showLaunchDialog(room.$location.tag)").
                                         \#{{ room.$location.instanceName }} {{ room.$location.accessType }} #[template(v-if="room.occupants") ({{ room.occupants }})]
                                     invite-yourself(:location="room.$location.tag" style="margin-left:5px")
+                                    el-button(@click="copyUrl(room.$location.tag)" size="mini" icon="el-icon-link" style="margin-left:5px" circle)
                                 .x-friend-list(style="margin:10px 0" v-if="room.$location.userId || room.users.length")
                                     .x-friend-item(v-if="room.$location.userId" @click="showUserDialog(room.$location.userId)")
                                         template(v-if="room.$location.user")
@@ -1039,6 +1053,7 @@ html
                         el-input(ref="wtf" v-model="newInstanceDialog.url" size="mini" readonly @click.native="$event.target.tagName === 'INPUT' && $event.target.select()")
                 template(#footer)
                     el-button(size="small" @click="makeHome(newInstanceDialog.location)") Make Home
+                    el-button(size="small" @click="copyInstanceUrl(newInstanceDialog.url)") Copy
                     el-button(size="small" @click="showInviteDialog(newInstanceDialog.location)") Invite
                     el-button(type="primary" size="small" @click="showLaunchDialog(newInstanceDialog.location)") Launch
 
@@ -1058,7 +1073,8 @@ html
             el-dialog.x-dialog(ref="launchDialog" :visible.sync="launchDialog.visible" title="Launch" width="400px")
                 div #[span(v-text="launchDialog.url" style="word-break:break-all;font-size:12px")]
                 template(#footer)
-                    el-checkbox(v-model="launchDialog.desktop" style="float:left;margin-top:5px") Start as Desktop (No VR)
+                    el-checkbox(v-model="launchDialog.desktop" style="float:left;margin-top:5px") Start as Desktop
+                    el-button(size="small" @click="copyInstanceUrl(launchDialog.url)") Copy
                     el-button(size="small" @click="showInviteDialog(launchDialog.location)") Invite
                     el-button(type="primary" size="small" @click="launchGame(locationToLaunchArg(launchDialog.location))") Launch
 

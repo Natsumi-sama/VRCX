@@ -12,6 +12,7 @@ html
         link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+JP|Noto+Sans+KR&display=swap")
         link(rel="stylesheet" href="vr.css")
     body
+        #vroverlay
         .x-app#x-app(style="display:none" :class="{ 'x-app-type': appType === '1' }")
             .x-container(style="flex:1")
                 .x-friend-list(ref="list" style="color:#aaa")
@@ -20,37 +21,44 @@ html
                             .detail
                                 span.extra
                                     span.time {{ feed.created_at | formatDate('HH:MI') }}
-                                    | #[span.name(v-text="feed.displayName")] is in #[location(:location="feed.location[0]")]
+                                    | #[span.name(v-text="feed.displayName")] #[location(:location="feed.location[0]")]
                         div(v-else-if="feed.type === 'Offline'" class="x-friend-item" :class="{ friend: feed.isFriend, favorite: feed.isFavorite }")
                             .detail
                                 span.extra
                                     span.time {{ feed.created_at | formatDate('HH:MI') }}
-                                    | #[span.name(v-text="feed.displayName")] has logged out
+                                    | #[span.name(v-text="feed.displayName")] ❌
                         div(v-else-if="feed.type === 'Online'" class="x-friend-item" :class="{ friend: feed.isFriend, favorite: feed.isFavorite }")
                             .detail
                                 span.extra
                                     span.time {{ feed.created_at | formatDate('HH:MI') }}
-                                    | #[span.name(v-text="feed.displayName")] has logged in
+                                    | #[span.name(v-text="feed.displayName")] ✔️
                         div(v-else-if="feed.type === 'Status'" class="x-friend-item" :class="{ friend: feed.isFriend, favorite: feed.isFavorite }")
                             .detail
                                 span.extra
                                     span.time {{ feed.created_at | formatDate('HH:MI') }}
-                                    | #[span.name(v-text="feed.displayName")] is #[i.x-user-status(:class="userStatusClass(feed.status[0])")] {{feed.status[0].statusDescription}}
+                                    | #[span.name(v-text="feed.displayName")] #[i.x-user-status(:class="userStatusClass(feed.status[0])")] {{feed.status[0].statusDescription}}
                         div(v-else-if="feed.type === 'OnPlayerJoined'" class="x-friend-item" :class="{ friend: feed.isFriend, favorite: feed.isFavorite }")
                             .detail
                                 span.extra
                                     span.time {{ feed.created_at | formatDate('HH:MI') }}
-                                    | #[span.name(v-text="feed.data")] has joined
+                                    | ▶️ #[span.name(v-text="feed.data")]
                         div(v-else-if="feed.type === 'OnPlayerLeft'" class="x-friend-item" :class="{ friend: feed.isFriend, favorite: feed.isFavorite }")
                             .detail
                                 span.extra
                                     span.time {{ feed.created_at | formatDate('HH:MI') }}
-                                    | #[span.name(v-text="feed.data")] has left
+                                    | ◀️ #[span.name(v-text="feed.data")]
                         div(v-else-if="feed.type === 'Location'" class="x-friend-item" :class="{ friend: feed.isFriend, favorite: feed.isFavorite }")
                             .detail
                                 span.extra
                                     span.time {{ feed.created_at | formatDate('HH:MI') }}
                                     location(:location="feed.data")
+                        div(v-else-if="feed.type === 'VideoChange'" class="x-friend-item" :class="{ friend: feed.isFriend, favorite: feed.isFavorite }")
+                            .detail
+                                span.extra
+                                    span.time {{ feed.created_at | formatDate('HH:MI') }}
+                                    | 🎵 #[span(style="color: red;" v-text="feed.videoChange.playerYeet")]
+                                    | #[span.name(v-text="feed.videoChange.playerPlayer")]
+                                    | #[span(v-text="feed.videoChange.videoName")]
             .x-container
                 div(style="display:flex;flex-direction:row")
                     template(v-if="devices.length")
@@ -91,7 +99,10 @@ html
                                 img(v-else src="images/other_status_ready.png" style="width:32px;height:32px")
                                 br
                                 span {{ device[2] }}%
-            .x-container
+            .x-containerbottom
+                span(style="float:right") {{ nowPlayingobj.videoProgressText }}
+                span {{ nowPlayingobj.videoName }}
+                #progress
                 span(style="float:right") {{ currentTime | formatDate('YYYY-MM-DD HH:MI:SS AMPM') }}
                 span CPU {{ cpuUsage }}%
         script(src="vr.js")

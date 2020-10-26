@@ -1,12 +1,16 @@
-﻿// Copyright(c) 2019 pypy. All rights reserved.
+// Copyright(c) 2019 pypy. All rights reserved.
 //
 // This work is licensed under the terms of the MIT license.
 // For a copy, see <https://opensource.org/licenses/MIT>.
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -26,6 +30,8 @@ namespace VRCX
         private static List<string[]> m_GameLog = new List<string[]>();
         private static Thread m_Thread;
         private static bool m_Reset;
+        private static string playerPlayer = string.Empty;
+        private static string playerRequest = string.Empty;
 
         // NOTE
         // FileSystemWatcher() is unreliable
@@ -227,6 +233,81 @@ namespace VRCX
                                     {
                                         m_Lock.ExitWriteLock();
                                     }
+                                }
+                            }
+                            else if (c == 'N')
+                            {
+                                if (s.Length > 64 &&
+                                    string.Compare(s, 34, "[NetworkManager] OnPlayerLeft ", 0, 30, StringComparison.Ordinal) == 0)
+                                {
+                                    // 2020.06.30 20:25:10 Log        -  [NetworkManager] OnPlayerLeft Wessaz
+                                    var time = ConvertLogTimeToISO8601(s);
+                                    var data = s.Substring(64);
+                                    m_Lock.EnterWriteLock();
+                                    try
+                                    {
+                                        m_GameLog.Add(new[]
+                                        {
+                                                time,
+                                                "OnPlayerLeft",
+                                                data
+                                        });
+                                    }
+                                    finally
+                                    {
+                                        m_Lock.ExitWriteLock();
+                                    }
+                                }
+                            }
+                            // 2020.10.16 14:42:31 Log        -  [UdonSync] vrcw executing Beep at the behest of Natsumi-sama
+                            // 2020.10.16 14:42:33 Log        -  [Video Playback] Attempting to resolve URL 'http://storage.llss.io/yUKvv_nCpj0.mp4'
+                            // 2020.10.16 14:42:34 Log        -  [Video Playback] URL 'http://storage.llss.io/yUKvv_nCpj0.mp4' resolved to 'http://storage.llss.io/yUKvv_nCpj0.mp4'
+                            else if (c == 'V')
+                            {
+                                if (s.Length > 78 &&
+                                        string.Compare(s, 34, "[Video Playback] Attempting to resolve URL '", 0, 44, StringComparison.Ordinal) == 0)
+                                {
+                                    var time = ConvertLogTimeToISO8601(s);
+                                    var data = s.Substring(78);
+                                    var pos = data.LastIndexOf("'");
+                                    if (pos >= 0)
+                                    {
+                                        data = data.Substring(0, pos);
+                                    }
+                                    m_Lock.EnterWriteLock();
+                                    try
+                                    {
+                                        var Dick = new Dictionary<string, string>
+                                        {
+                                            { "videoURL", data },
+                                            { "playerRequest", playerRequest },
+                                            { "playerPlayer", playerPlayer }
+                                        };
+                                        var Obj = JObject.FromObject(Dick);
+                                        m_GameLog.Add(new[]
+                                        {
+                                                time,
+                                                "VideoChange",
+                                                Obj.ToString()
+                                        });
+                                        playerPlayer = string.Empty;
+                                        playerRequest = string.Empty;
+                                    }
+                                    finally
+                                    {
+                                        m_Lock.ExitWriteLock();
+                                    }
+                                }
+                            }
+                            else if (c == 'U')
+                            {
+                                if (s.Length > 82 &&
+                                    string.Compare(s, 34, "[UdonSync] vrcw executing Beep at the behest of ", 0, 48, StringComparison.Ordinal) == 0)
+                                {
+                                    var time = ConvertLogTimeToISO8601(s);
+                                    var data = s.Substring(82);
+                                    playerRequest = playerPlayer;
+                                    playerPlayer = data;
                                 }
                             }
                         }

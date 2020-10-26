@@ -11,6 +11,7 @@ using System.Linq;
 using System.Management;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.IO;
 
 namespace VRCX
 {
@@ -21,6 +22,16 @@ namespace VRCX
         static VRCX()
         {
             Instance = new VRCX();
+        }
+
+        public void ChangeVolume(string Volume)
+        {
+            ProcessStartInfo Stuff = new ProcessStartInfo()
+            {
+                FileName = Path.GetFullPath("nircmd.exe"),
+                Arguments = $"setappvolume VRChat.exe {Volume}"
+            };
+            Process.Start(Stuff);
         }
 
         public void ShowDevTools()

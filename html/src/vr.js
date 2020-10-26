@@ -3,11 +3,23 @@
 //
 // This work is licensed under the terms of the MIT license.
 // For a copy, see <https://opensource.org/licenses/MIT>.
+import $ from 'jquery';
+window.$ = window.jQuery = $;
 
 import Noty from 'noty';
 import Vue from 'vue';
 import ElementUI from 'element-ui';
 import locale from 'element-ui/lib/locale/lang/en';
+import ProgressBar from 'progressbar.js';
+
+var bar = new ProgressBar.Circle(vroverlay, {
+  strokeWidth: 50,
+  easing: 'easeInOut',
+  duration: 500,
+  color: '#aaa',
+  trailWidth: 0,
+  svgStyle: null
+});
 
 CefSharp.BindObjectAsync(
     'VRCX',
@@ -74,13 +86,18 @@ CefSharp.BindObjectAsync(
 
     Noty.overrideDefaults({
         animation: {
-            open: 'animate__animated animate__fadeIn',
-            close: 'animate__animated animate__zoomOut'
+			open: 'animate__animated animate__fadeIn',
+			close: 'animate__animated animate__zoomOut'
         },
         layout: 'topCenter',
-        theme: 'relax',
-        timeout: 6000
+        theme: 'sunset',
+        timeout: 2000
     });
+
+		//new Noty({
+		//		type: 'alert',
+		//		text: `<strong>Test</strong> testing`
+    //}).show();
 
     Vue.use(ElementUI, {
         locale
@@ -620,6 +637,10 @@ CefSharp.BindObjectAsync(
             appType: location.href.substr(-1),
             currentTime: new Date().toJSON(),
             cpuUsage: 0,
+            nowPlayingobj: {},
+            worldJoinTime: 0,
+            lastPlaying: 0,
+            progressBar: 0,
             feeds: [],
             devices: []
         },
@@ -662,7 +683,7 @@ CefSharp.BindObjectAsync(
         this.currentTime = new Date().toJSON();
         this.currentUser = VRCXStorage.GetObject('currentUser') || {};
         VRCX.CpuUsage().then((cpuUsage) => {
-            this.cpuUsage = cpuUsage.toFixed(2);
+            this.cpuUsage = cpuUsage.toFixed(0);
         });
         if (VRCXStorage.GetBool('VRCX_hideDevicesFromFeed') === false) {
             VRCX.GetVRDevices().then((devices) => {
@@ -682,77 +703,165 @@ CefSharp.BindObjectAsync(
         // TODO: block mute hideAvatar unfriend
         var _feeds = this.feeds;
         this.feeds = VRCXStorage.GetArray('sharedFeeds');
-        if (this.appType === '2') {
-            var map = {};
-            _feeds.forEach((feed) => {
-                if (feed.isFavorite) {
-                    if (feed.type === 'OnPlayerJoined' ||
-                        feed.type === 'OnPlayerLeft') {
-                        if (!map[feed.data] ||
-                            map[feed.data] < feed.created_at) {
-                            map[feed.data] = feed.created_at;
-                        }
-                    } else if (feed.type === 'Online' ||
-                        feed.type === 'Offline') {
-                        if (!map[feed.displayName] ||
-                            map[feed.displayName] < feed.created_at) {
-                            map[feed.displayName] = feed.created_at;
-                        }
+        var map = {};
+        var newPlayingobj = {};
+        newPlayingobj.videoURL = "";
+        newPlayingobj.videoName = "";
+        newPlayingobj.videoVolume = "";
+        this.nowPlayingobj.videoProgressText = "";
+        var locationChange = false;
+        var videoChangeTime = "";
+        _feeds.forEach((feed) => {
+            if ((feed.type === "Location") && (locationChange === false)) {
+                locationChange = true;
+                this.worldJoinTime = feed.created_at;
+            }
+            if ((feed.type === "VideoChange") && (newPlayingobj.videoURL === "")) {
+                newPlayingobj = feed.videoChange;
+                videoChangeTime = feed.created_at;
+            }
+            if (feed.isFavorite) {
+                if (feed.type === 'OnPlayerJoined' ||
+                feed.type === 'OnPlayerLeft') {
+                    if (!map[feed.data] ||
+                        map[feed.data] < feed.created_at) {
+                        map[feed.data] = feed.created_at;
+                    }
+                } else if (feed.type === 'Online' ||
+                feed.type === 'Offline') {
+                    if (!map[feed.displayName] ||
+                        map[feed.displayName] < feed.created_at) {
+                        map[feed.displayName] = feed.created_at;
                     }
                 }
-            });
+             }
+        });
+
+        if (newPlayingobj.videoURL != "") {
+            var percentage = 0;
+            var videoLength = Number(newPlayingobj.videoLength) + 9;
+            var currentTime = Date.now() / 1000;
+            var videoStartTime = videoLength + Date.parse(videoChangeTime) / 1000;
+            var videoProgress = Math.floor((videoStartTime - currentTime) * 100) / 100;
+            if ((Date.parse(videoChangeTime) / 1000) < (Date.parse(this.worldJoinTime) / 1000)) {
+                videoProgress = 0;
+            }
+            if (videoProgress > 0) {
+                function sec2time(timeInSeconds) {
+                    var pad = function(num, size) { return ('000' + num).slice(size * -1); },
+                    time = parseFloat(timeInSeconds).toFixed(3),
+                    hours = Math.floor(time / 60 / 60),
+                    minutes = Math.floor(time / 60) % 60,
+                    seconds = Math.floor(time - minutes * 60);
+                    var hoursOut = "";
+                    if (hours > "0") { hoursOut = pad(hours, 2) + ':' }
+                    return hoursOut + pad(minutes, 2) + ':' + pad(seconds, 2);
+                }
+                this.nowPlayingobj.videoProgressText = sec2time(videoProgress);
+                percentage = Math.floor((((videoLength - videoProgress) * 100) / videoLength) * 100) / 100;
+            }
+            else {
+                newPlayingobj.videoURL = "";
+                newPlayingobj.videoName = "";
+                newPlayingobj.videoVolume = "";
+            }
+        }
+        if (this.nowPlayingobj.videoURL !== newPlayingobj.videoURL)  {
+            this.nowPlayingobj = newPlayingobj;
+            if (this.appType === '2') {
+                if ((VRCXStorage.GetBool('VRCX_videoNotification') == true) && (this.nowPlayingobj.videoURL != "")) {
+                    new Noty({
+                        type: 'alert',
+                        text: newPlayingobj.videoName
+                    }).show();
+                }
+                if (VRCXStorage.GetBool('VRCX_volumeNormalize') == true) {
+                    if (newPlayingobj.videoVolume != "") {
+                        var mindB = "-10.0";
+                        var maxdB = "-24.0";
+                        var minVolume = "30";
+                        var dBpercenatge = ((newPlayingobj.videoVolume - mindB) * 100) / (maxdB - mindB);
+                        if (dBpercenatge > 100) { dBpercenatge = 100; }
+                        else if (dBpercenatge < 0) { dBpercenatge = 0; }
+                        var newPercenatge = ((minVolume / 43) * dBpercenatge) + Number(minVolume);
+                        var mixerVolume = newPercenatge / 100.0;
+                        var mixerVolumeFloat = mixerVolume.toFixed(2);
+                    }
+                    else {
+                        var mixerVolumeFloat = "0.50";
+                    }
+                    VRCX.ChangeVolume(mixerVolumeFloat);
+                }
+            }
+        }
+        if (this.appType === '2') {
+            if (VRCXStorage.GetBool('VRCX_progressPie') == true) {
+                bar.animate(parseFloat(percentage) / 100.0);
+            }
+            else {
+                bar.animate(0);
+            }
+        }
+        else {
+            document.getElementById("progress").style.width = percentage + "%";
+        }
+
+        if ((this.appType === '2') && (VRCXStorage.GetBool('VRCX_VIPNotifications') === true)) {
+
             // disable notification on busy
             if (this.currentUser.status === 'busy') {
                 return;
             }
-            if (VRCXStorage.GetBool('VRCX_VIPNotifications') === true) {
-                var notys = [];
-                this.feeds.forEach((feed) => {
-                    if (feed.isFavorite) {
-                        if (feed.type === 'Online' ||
-                            feed.type === 'Offline') {
-                            if (!map[feed.displayName] ||
-                                map[feed.displayName] < feed.created_at) {
+            var notys = [];
+            this.feeds.forEach((feed) => {
+                if (feed.isFavorite) {
+                    if (feed.type === 'Online' ||
+                    feed.type === 'Offline') {
+                        if (!map[feed.displayName] ||
+                            map[feed.displayName] < feed.created_at) {
                                 map[feed.displayName] = feed.created_at;
                                 notys.push(feed);
                             }
-                        } else if (feed.type === 'OnPlayerJoined' ||
-                            feed.type === 'OnPlayerLeft') {
-                            if (!map[feed.data] ||
-                                map[feed.data] < feed.created_at) {
+                    } else if (feed.type === 'OnPlayerJoined' ||
+                    feed.type === 'OnPlayerLeft') {
+                        if (!map[feed.data] ||
+                            map[feed.data] < feed.created_at) {
                                 map[feed.data] = feed.created_at;
                                 notys.push(feed);
                             }
                         }
                     }
-                });
-                var bias = new Date(Date.now() - 60000).toJSON();
-                notys.forEach((noty) => {
-                    if (noty.created_at > bias) {
-                        if (noty.type === 'OnPlayerJoined') {
-                            new Noty({
-                                type: 'alert',
-                                text: `<strong>${noty.data}</strong> has joined`
-                            }).show();
-                        } else if (noty.type === 'OnPlayerLeft') {
-                            new Noty({
-                                type: 'alert',
-                                text: `<strong>${noty.data}</strong> has left`
-                            }).show();
-                        } else if (noty.type === 'Online') {
-                            new Noty({
-                                type: 'alert',
-                                text: `<strong>${noty.displayName}</strong> has logged in`
-                            }).show();
-                        } else if (noty.type === 'Offline') {
-                            new Noty({
-                                type: 'alert',
-                                text: `<strong>${noty.displayName}</strong> has logged out`
-                            }).show();
-                        }
+            });
+            var bias = new Date(Date.now() - 60000).toJSON();
+            notys.forEach((noty) => {
+                if (noty.created_at > bias) {
+                    switch(noty.type) {
+                        case 'OnPlayerJoined':
+                        new Noty({
+                            type: 'alert',
+                            text: `<strong>${noty.data}</strong> has joined`
+                        }).show();
+                        break;
+                        case 'OnPlayerLeft':
+                        new Noty({
+                            type: 'alert',
+                            text: `<strong>${noty.data}</strong> has left`
+                        }).show();
+                        case 'Online':
+                        new Noty({
+                            type: 'alert',
+                            text: `<strong>${noty.displayName}</strong> has logged in`
+                        }).show();
+                        break;
+                        case 'Offline':
+                        new Noty({
+                            type: 'alert',
+                            text: `<strong>${noty.displayName}</strong> has logged out`
+                        }).show();
+                        break;
                     }
-                });
-            }
+                }
+            });
         }
     };
 

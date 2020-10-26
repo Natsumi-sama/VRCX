@@ -39,6 +39,7 @@ mix.js('src/vr.js', 'dist/');
 mix.sass('src/app.scss', 'dist/');
 mix.sass('src/app.dark.scss', 'dist/');
 mix.sass('src/vr.scss', 'dist/');
+mix.copy('src/PyPyVideos.json', 'dist/');
 
 // Full API
 // mix.js(src, output);

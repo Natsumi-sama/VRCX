@@ -10,6 +10,9 @@ import VueLazyload from 'vue-lazyload';
 import { DataTables } from 'vue-data-tables';
 import ElementUI from 'element-ui';
 import locale from 'element-ui/lib/locale/lang/en';
+import copy from 'copy-to-clipboard';
+import $ from 'jquery';
+window.$ = window.jQuery = $;
 
 CefSharp.BindObjectAsync(
     'VRCX',
@@ -635,7 +638,7 @@ CefSharp.BindObjectAsync(
     };
 
     Vue.component('launch', {
-        template: '<el-button @click="confirm" size="mini" icon="el-icon-link" circle></el-button>',
+        template: '<el-button @click="confirm" size="mini" icon="el-icon-info" circle></el-button>',
         props: {
             location: String
         },
@@ -3407,6 +3410,28 @@ CefSharp.BindObjectAsync(
                 // FIXME: 이거 존나 느릴거 같은데
                 var isFriend = false;
                 var isFavorite = false;
+
+                //if (ctx.type === "VideoChange") {
+                // function urlGetFunction(url) {
+                //   return $.ajax({
+                //     url: url,
+                //     async: false
+                //   });
+                // }
+                // if (ctx.videoChange.videoURL.substring(0, 32) === "https://www.youtube.com/watch?v=") {
+                //   var videoID = ctx.videoChange.videoURL.substring(32);
+                //   var videoJSON = urlGetFunction("https://qwertyuiop.nz/pypy/YouTubeLookup.php?videoid=" + videoID).responseText;
+                //   var videoobj = JSON.parse(videoJSON);
+                //   ctx.videoChange.videoName = videoobj.Video_Name;
+                //   //// TODO: math
+                //   ctx.videoChange.videoLength = videoobj.Video_Length;
+                // }
+                // else if (ctx.videoChange.videoURL.substring(0, 17) === "https://youtu.be/") {
+                //   var videoID = ctx.videoChange.videoURL.substring(17);
+                //   var videoJSON = urlGetFunction("https://qwertyuiop.nz/pypy/YouTubeLookup.php?videoid=" + videoID).responseText;
+                //   var videoobj = JSON.parse(videoJSON);
+                //   ctx.videoChange.videoName = videoobj.Video_Name;
+                // }
                 for (var ref of API.cachedUsers.values()) {
                     if (ref.displayName === ctx.data) {
                         isFriend = this.friends.has(ref.id);
@@ -4472,6 +4497,17 @@ CefSharp.BindObjectAsync(
         LogWatcher.Get().then((logs) => {
             if (logs.length) {
                 var { data } = this.gameLogTable;
+
+                function urlGetFunction(url) {
+                  return $.ajax({
+                    url: url,
+                    async: false
+                  });
+                }
+                //var videoTableJSON = urlGetFunction("https://qwertyuiop.nz/pypy/PyPyVideoLookup?JSON").responseText;
+                var videoTableJSON = urlGetFunction("PyPyVideos.json").responseText;
+                var tableobj = JSON.parse(videoTableJSON);
+
                 for (var log of logs) {
                     var ctx = {
                         created_at: String(log[0]),
@@ -4489,6 +4525,34 @@ CefSharp.BindObjectAsync(
                         }
                         this.lastLocation = tag;
                     }
+
+                    if (ctx.type === 'VideoChange') {
+                      var videoobj = JSON.parse(ctx.data);
+                      videoobj.videoID = "";
+                      videoobj.playerYeet = "";
+                      if ((videoobj.playerPlayer != "") && (videoobj.playerRequest != "") && (videoobj.playerPlayer != videoobj.playerRequest)) {
+                        videoobj.playerYeet = videoobj.playerPlayer;
+                        videoobj.playerPlayer = videoobj.playerRequest
+                      }
+                      ctx.data = videoobj.playerPlayer;
+                      if (videoobj.videoURL.substring(0, 23) === "http://storage.llss.io/") {
+                        videoobj.fileName = videoobj.videoURL.substring(23);
+                        for (var video of tableobj) {
+                          if (video.FileName === videoobj.fileName) {
+                              videoobj.videoName = video.Video_Name;
+                              videoobj.videoID = video.Video_ID;
+                              videoobj.videoLength = video.VideoLength;
+                              videoobj.videoVolume = video.Video_Volume;
+                              break;
+                          }
+                        }
+                      }
+                      else {
+                        videoobj.videoName = videoobj.videoURL;
+                      }
+                      ctx.videoChange = videoobj;
+                    }
+
                     data.push(ctx);
                 }
                 this.sweepGameLog();
@@ -4578,6 +4642,19 @@ CefSharp.BindObjectAsync(
         this.search();
         this.$refs.menu.activeIndex = 'search';
         this.$refs.searchTab.currentName = '0';
+    };
+
+    $app.methods.getVideoName = function (videoChange) {
+        var playerPlayer = "";
+        if (videoChange.playerPlayer != "") {
+          playerPlayer = " (" + videoChange.playerPlayer + ")";
+        }
+        if (videoChange.videoID != "") {
+          return videoChange.videoID + " : " + videoChange.videoName + playerPlayer;
+        }
+        else {
+          return videoChange.videoURL + playerPlayer;
+        }
     };
 
     // App: Search
@@ -5517,6 +5594,19 @@ CefSharp.BindObjectAsync(
     $app.watch.isStartAtWindowsStartup = saveVRCXWindowOption;
     $app.watch.isStartAsMinimizedState = saveVRCXWindowOption;
     $app.watch.isCloseToTray = saveVRCXWindowOption;
+
+
+    $app.data.progressPie = VRCXStorage.GetBool('VRCX_progressPie');
+    $app.data.videoNotification = VRCXStorage.GetBool('VRCX_videoNotification');
+    $app.data.volumeNormalize = VRCXStorage.GetBool('VRCX_volumeNormalize');
+    var saveVRCXPyPyOption = function () {
+        VRCXStorage.SetBool('VRCX_progressPie', this.progressPie);
+        VRCXStorage.SetBool('VRCX_videoNotification', this.videoNotification);
+        VRCXStorage.SetBool('VRCX_volumeNormalize', this.volumeNormalize);
+    };
+    $app.watch.progressPie = saveVRCXPyPyOption;
+    $app.watch.videoNotification = saveVRCXPyPyOption;
+    $app.watch.volumeNormalize = saveVRCXPyPyOption;
 
     API.$on('LOGIN', function () {
         $app.currentUserTreeData = [];
@@ -7275,6 +7365,30 @@ CefSharp.BindObjectAsync(
         }
         VRCX.StartGame(args.join(' '));
         D.visible = false;
+    };
+
+		$app.methods.copyInstanceUrl = function (URL) {
+      copy(URL);
+      this.$message({
+          message: 'URL copied to Clipboard',
+          type: 'success'
+      });
+      this.launchDialog.visible = false;
+      this.newInstanceDialog.visible = false;
+		};
+
+    $app.methods.copyUrl = function (URL) {
+        var L = API.parseLocation(URL);
+        if (L.instanceId) {
+            var urlOut = `https://vrchat.net/launch?worldId=${encodeURIComponent(L.worldId)}&instanceId=${encodeURIComponent(L.instanceId)}`;
+        } else {
+            var urlOut = `https://vrchat.net/launch?worldId=${encodeURIComponent(L.worldId)}`;
+        }
+        copy(urlOut);
+        new Noty({
+            type: 'success',
+            text: 'instance URL copied to clipboard'
+        }).show();
     };
 
     $app = new Vue($app);
