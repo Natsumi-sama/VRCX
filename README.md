@@ -1,3 +1,24 @@
+# VRCX PyPyDance Companion
+
+[Download](https://github.com/Natsumi-sama/VRCX/releases/)
+
+Requires `--enable-sdk-log-levels` VRChat launch parameter for logging of user requesting video
+
+Extra features:
+![image](https://user-images.githubusercontent.com/11171153/97168742-d600d980-17ed-11eb-844f-57273d5e590d.png)
+
+Different look:
+![image](https://user-images.githubusercontent.com/11171153/97168994-32fc8f80-17ee-11eb-88f2-c783f2bb5fd7.png)
+
+Now playing information:
+![image](https://user-images.githubusercontent.com/11171153/97169650-42c8a380-17ef-11eb-95b0-a85c51a8de07.png)
+
+Video progress overlay:
+![image](https://user-images.githubusercontent.com/11171153/97169618-347a8780-17ef-11eb-924a-06c2407f479d.png)
+
+
+Comes with [nircmd](https://www.nirsoft.net/utils/nircmd.html) to adjust Windows volume mixer.
+
 # VRCX
 
 VRCX is an assistant application for provide information about manage friendship. this application uses unofficial VRChat API (VRCSDK).
