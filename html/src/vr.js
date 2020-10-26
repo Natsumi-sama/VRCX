@@ -847,6 +847,7 @@ CefSharp.BindObjectAsync(
                             type: 'alert',
                             text: `<strong>${noty.data}</strong> has left`
                         }).show();
+                        break;
                         case 'Online':
                         new Noty({
                             type: 'alert',
