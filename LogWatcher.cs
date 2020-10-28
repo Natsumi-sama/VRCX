@@ -251,30 +251,6 @@ namespace VRCX
                                     }
                                 }
                             }
-                            else if (c == 'N')
-                            {
-                                if (s.Length > 64 &&
-                                    string.Compare(s, 34, "[NetworkManager] OnPlayerLeft ", 0, 30, StringComparison.Ordinal) == 0)
-                                {
-                                    // 2020.06.30 20:25:10 Log        -  [NetworkManager] OnPlayerLeft Wessaz
-                                    var time = ConvertLogTimeToISO8601(s);
-                                    var data = s.Substring(64);
-                                    m_Lock.EnterWriteLock();
-                                    try
-                                    {
-                                        m_GameLog.Add(new[]
-                                        {
-                                                time,
-                                                "OnPlayerLeft",
-                                                data
-                                        });
-                                    }
-                                    finally
-                                    {
-                                        m_Lock.ExitWriteLock();
-                                    }
-                                }
-                            }
                             // 2020.10.16 14:42:31 Log        -  [UdonSync] vrcw executing Beep at the behest of Natsumi-sama
                             // 2020.10.16 14:42:33 Log        -  [Video Playback] Attempting to resolve URL 'http://storage.llss.io/yUKvv_nCpj0.mp4'
                             // 2020.10.16 14:42:34 Log        -  [Video Playback] URL 'http://storage.llss.io/yUKvv_nCpj0.mp4' resolved to 'http://storage.llss.io/yUKvv_nCpj0.mp4'
