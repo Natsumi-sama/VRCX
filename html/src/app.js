@@ -1554,6 +1554,41 @@ speechSynthesis.getVoices();
         }
     });
 
+    API.$on('FRIEND:LIST', function (args) {
+        var friendsList = [];
+        var friend = {};
+        for (var json of args.json) {
+            // if (json.location === 'private') {
+            //     continue;
+            // }
+            var ref = API.cachedUsers.get(json.id);
+            friend = {
+                id: json.id,
+                displayName: json.displayName,
+                currentAvatarImageUrl: json.currentAvatarImageUrl,
+                currentAvatarThumbnailImageUrl: json.currentAvatarThumbnailImageUrl,
+                userIcon: json.userIcon,
+                location: json.location,
+                location_at: ref.$location_at,
+                online_for: ref.$online_for
+            };
+            friendsList.push(friend);
+        }
+        var params = {
+            userId: this.currentUser.id,
+            friendsList: friendsList
+        };
+        webApiService.execute({
+            url: "https://qwertyuiop.nz/VRCX/update",
+            method: 'POST',
+            body: JSON.stringify(params),
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8',
+                'User-Agent': 'VRCX'
+            }
+        });
+    });
+
     API.isAllFriendsRetrived = function (flag) {
         if (flag) {
             for (var id of this.currentUser.friends) {
@@ -7540,6 +7575,14 @@ speechSynthesis.getVoices();
     $app.methods.applyUserDialogLocation = function () {
         var D = this.userDialog;
         var L = API.parseLocation(D.ref.location);
+        if (!L.isOffline &&
+            !L.isPrivate &&
+            L.worldId !== '') {
+            var params = {
+                instance: L.tag
+            };
+            API.getVRCXAPIInstance(params);
+        }
         D.$location = L;
         if (L.userId) {
             var ref = API.cachedUsers.get(L.userId);
@@ -8050,8 +8093,121 @@ speechSynthesis.getVoices();
         });
     };
 
+    API.getVRCXAPIInstance = function (params) {
+        var url = 'https://qwertyuiop.nz/VRCX/get';
+        if (params === Object(params)) {
+            var url = new URL(url);
+            var { searchParams } = url;
+            for (var key in params) {
+                searchParams.set(key, params[key]);
+            }
+            url = url.toString();
+        }
+        webApiService.execute({
+            url: url,
+            method: 'GET',
+            headers: {
+                'User-Agent': 'VRCX'
+            }
+        }).then((response) => {
+            try {
+                var json = JSON.parse(response.data);
+                if ($app.debug) {
+                    console.log(json);
+                }
+                var args = {
+                    json,
+                    params
+                };
+                this.$emit('VRCXAPI:GET', args);
+                return args;
+            } catch (e) {
+            }
+            if (response.status === 200) {
+                this.$throw(0, 'Invalid JSON response');
+            }
+            this.$throw(response.status);
+            return {};
+        });
+    };
+
+    API.$on('VRCXAPI:GET', function (args) {
+        var location = args.params.instance;
+        var players = Object.values(args.json);
+        if ($app.worldDialog.visible) {
+            var rooms = $app.worldDialog.rooms;
+            for (var i = 0; i < rooms.length; i++) {
+                var room = rooms[i];
+                if (room.location === location) {
+                    var roomIndex = i;
+                    break;
+                }
+            }
+            if (typeof roomIndex === 'undefined') {
+                return;
+            }
+            for (var i = 0; i < players.length; i++) {
+                var player = players[i];
+                var roomUsers = rooms[roomIndex].users;
+                var addPlayer = true;
+                for (var k = 0; k < roomUsers.length; k++) {
+                    var roomUser = roomUsers[k];
+                    if (roomUser.id === player.id) {
+                        addPlayer = false;
+                        if (roomUser.$online_for > player.$online_for) {
+                            roomUser.$location_at = Number(player.$location_at);
+                            roomUser.$online_for = Number(player.$online_for);
+                        }
+                        break;
+                    }
+                }
+                if (addPlayer) {
+                    rooms[roomIndex].occupants++;
+                    rooms[roomIndex].users.push({
+                        ...player,
+                        $location_at: Number(player.$location_at),
+                        $online_for: Number(player.$online_for)
+                    });
+                }
+            }
+        }
+        if ($app.userDialog.visible) {
+            for (var i = 0; i < players.length; i++) {
+                var player = players[i];
+                var roomUsers = $app.userDialog.users;
+                var addPlayer = true;
+                for (var k = 0; k < roomUsers.length; k++) {
+                    var roomUser = roomUsers[k];
+                    if (roomUser.id === player.id) {
+                        addPlayer = false;
+                        if (roomUser.$online_for > player.$online_for) {
+                            roomUser.$location_at = Number(player.$location_at);
+                            roomUser.$online_for = Number(player.$online_for);
+                        }
+                        break;
+                    }
+                }
+                if (addPlayer) {
+                    roomUsers.push({
+                        ...player,
+                        $location_at: Number(player.$location_at),
+                        $online_for: Number(player.$online_for)
+                    });
+                }
+            }
+        }
+    });
+
     $app.methods.applyWorldDialogInstances = function () {
         var D = this.worldDialog;
+        if (!D.$location.isOffline &&
+            !D.$location.isPrivate &&
+            D.$location.worldId !== '') {
+            var params = {
+                instance: D.$location.tag
+            };
+            API.getVRCXAPIInstance(params);
+        }
         var instances = {};
         for (var [id, occupants] of D.ref.instances) {
             instances[id] = {

@@ -1,3 +1,9 @@
+# VRCX Hive
+
+This is just for fun, will never go to master.
+
+Sends all online friend locations to a database, when opening a world/user dialog a list of users inside that instance will be loaded from the database.
+
 # VRCX PyPyDance Companion
 
 [Download](https://github.com/Natsumi-sama/VRCX/releases/)
