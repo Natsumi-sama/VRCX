@@ -3701,7 +3701,7 @@ speechSynthesis.getVoices();
         this.updateSharedFeedFeedTable(forceUpdate);
         this.updateSharedFeedNotificationTable(forceUpdate);
         this.updateSharedFeedFriendLogTable(forceUpdate);
-        this.updateSharedFeedPlayerModerationTable(forceUpdate);
+        //this.updateSharedFeedPlayerModerationTable(forceUpdate);
         var feeds = this.sharedFeed;
         if (!feeds.pendingUpdate) {
             return;
@@ -3808,13 +3808,12 @@ speechSynthesis.getVoices();
         var n = 0;
         var wristFilter = this.sharedFeedFilters.wrist;
         var notyFilter = this.sharedFeedFilters.noty;
-        var locationChange = false;
         var playerCountIndex = 0;
         var playerList = [];
         var friendList = [];
-        while ((w < 20) || (n < 5) || ((!locationChange) && (this.hideOnPlayerJoined))) {
-            var ctx = data[--i];
-            if ((i <= -1) || (ctx.created_at < bias)) {
+        for (var i = data.length - 1; i > -1; i--) {
+            var ctx = data[i];
+            if (ctx.created_at < bias) {
                 break;
             }
             if (ctx.type === 'Notification') {
@@ -3849,9 +3848,6 @@ speechSynthesis.getVoices();
                         notyArr.splice(k, 1);
                         n--;
                     }
-                }
-                if (w >= 20) {
-                    locationChange = true;
                 }
             }
             var isFriend = false;
@@ -3951,9 +3947,9 @@ speechSynthesis.getVoices();
         var n = 0;
         var wristFilter = this.sharedFeedFilters.wrist;
         var notyFilter = this.sharedFeedFilters.noty;
-        while ((w < 20) || (n < 5)) {
-            var ctx = data[--i];
-            if ((i <= -1) || (ctx.created_at < bias)) {
+        for (var i = data.length - 1; i > -1; i--) {
+            var ctx = data[i];
+            if (ctx.created_at < bias) {
                 break;
             }
             if (ctx.type === 'Avatar') {
@@ -4012,9 +4008,9 @@ speechSynthesis.getVoices();
         var n = 0;
         var wristFilter = this.sharedFeedFilters.wrist;
         var notyFilter = this.sharedFeedFilters.noty;
-        while ((w < 20) || (n < 5)) {
-            var ctx = data[--i];
-            if ((i <= -1) || (ctx.created_at < bias)) {
+        for (var i = data.length - 1; i > -1; i--) {
+            var ctx = data[i];
+            if (ctx.created_at < bias) {
                 break;
             }
             if (ctx.senderUserId === API.currentUser.id) {
@@ -4070,9 +4066,9 @@ speechSynthesis.getVoices();
         var n = 0;
         var wristFilter = this.sharedFeedFilters.wrist;
         var notyFilter = this.sharedFeedFilters.noty;
-        while ((w < 20) || (n < 5)) {
-            var ctx = data[--i];
-            if ((i <= -1) || (ctx.created_at < bias)) {
+        for (var i = data.length - 1; i > -1; i--) {
+            var ctx = data[i];
+            if (ctx.created_at < bias) {
                 break;
             }
             if (ctx.type === 'FriendRequest') {
@@ -4128,9 +4124,9 @@ speechSynthesis.getVoices();
         var n = 0;
         var wristFilter = this.sharedFeedFilters.wrist;
         var notyFilter = this.sharedFeedFilters.noty;
-        while ((w < 20) || (n < 5)) {
-            var ctx = data[--i];
-            if ((i <= -1) || (ctx.created < bias)) {
+        for (var i = data.length - 1; i > -1; i--) {
+            var ctx = data[i];
+            if (ctx.created < bias) {
                 break;
             }
             if (ctx.sourceUserId === API.currentUser.id) {
