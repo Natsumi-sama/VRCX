@@ -274,6 +274,8 @@ namespace VRCX
                     location,
                     logContext.RecentWorldName
                 });
+                playerPlayer = string.Empty;
+                playerRequest = string.Empty;
 
                 return true;
             }
