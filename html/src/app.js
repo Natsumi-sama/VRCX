@@ -3916,12 +3916,6 @@ speechSynthesis.getVoices();
             this.lastLocation.friendList = friendList;
             sharedRepository.setObject('last_location', this.lastLocation);
         }
-        if (this.worldDialog.visible) {
-            this.applyWorldDialogInstances();
-        }
-        if (this.userDialog.visible) {
-            this.applyUserDialogLocation();
-        }
         this.sharedFeed.gameLog.wrist = wristArr;
         this.sharedFeed.gameLog.noty = notyArr;
         this.sharedFeed.pendingUpdate = true;
@@ -7612,8 +7606,8 @@ speechSynthesis.getVoices();
             for (var i = 0; i < friendsInInstance.length; i++) {
                 var addUser = true;
                 var player = friendsInInstance[i];
-                for (var k = 0; k < D.users.length; k++) {
-                    var user = D.users[k];
+                for (var k = 0; k < users.length; k++) {
+                    var user = users[k];
                     if (user.displayName === player) {
                         addUser = false;
                         break;
