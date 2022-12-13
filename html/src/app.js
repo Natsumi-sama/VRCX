@@ -8453,7 +8453,7 @@ speechSynthesis.getVoices();
         if (props.bio) {
             var bio = '';
             var previousBio = '';
-            if (props.bio) {
+            if (props.bio[0] || props.bio[1]) {
                 if (props.bio[0]) {
                     bio = props.bio[0];
                 }
