@@ -3883,6 +3883,8 @@ console.log(`isLinux: ${LINUX}`);
         }
         if (index === 'notification') {
             this.unseenNotifications = [];
+        } else if (index === 'friendsList') {
+            this.friendsListSearchChange();
         }
 
         workerTimers.setTimeout(() => {
@@ -10749,12 +10751,14 @@ console.log(`isLinux: ${LINUX}`);
                 this.currentInstanceWorld.instance = ref;
             } else {
                 var L = $utils.parseLocation(instanceId);
-                API.getInstance({
-                    worldId: L.worldId,
-                    instanceId: L.instanceId
-                }).then((args) => {
-                    this.currentInstanceWorld.instance = args.ref;
-                });
+                if (L.isRealInstance) {
+                    API.getInstance({
+                        worldId: L.worldId,
+                        instanceId: L.instanceId
+                    }).then((args) => {
+                        this.currentInstanceWorld.instance = args.ref;
+                    });
+                }
             }
         }
     };
@@ -17771,7 +17775,7 @@ console.log(`isLinux: ${LINUX}`);
 
     $app.methods.refreshInstancePlayerCount = function (instance) {
         var L = $utils.parseLocation(instance);
-        if (L.worldId && L.instanceId) {
+        if (L.isRealInstance) {
             API.getInstance({
                 worldId: L.worldId,
                 instanceId: L.instanceId
@@ -18615,7 +18619,9 @@ console.log(`isLinux: ${LINUX}`);
             console.log(`Print saved to file: ${monthFolder}\\${fileName}`);
 
             if (this.cropInstancePrints) {
-                await AppApi.CropPrintImage(filePath);
+                if (!await AppApi.CropPrintImage(filePath)) {
+                    console.error('Failed to crop print image');
+                }
             }
         }
 
@@ -22322,7 +22328,7 @@ console.log(`isLinux: ${LINUX}`);
         }
         if (!API.queuedInstances.has(instanceId)) {
             var L = $utils.parseLocation(instanceId);
-            if (L.worldId && L.instanceId) {
+            if (L.isRealInstance) {
                 API.getInstance({
                     worldId: L.worldId,
                     instanceId: L.instanceId
@@ -23366,13 +23372,27 @@ console.log(`isLinux: ${LINUX}`);
 
         const allFriends = [...this.vipFriends, ...this.onlineFriends];
         allFriends.forEach((friend) => {
-            if (!friend.ref?.$location.isRealInstance) return;
+            let locationTag;
 
-            const key = friend.ref.$location.tag;
-            if (!friendsList[key]) {
-                friendsList[key] = [];
+            if (friend.ref?.$location.isRealInstance) {
+                locationTag = friend.ref.$location.tag;
+            } else if (this.lastLocation.friendList.has(friend.id)) {
+                let $location = $utils.parseLocation(this.lastLocation.location);
+                if ($location.isRealInstance) {
+                    if ($location.tag === 'private') {
+                        locationTag = this.lastLocation.name;
+                    } else {
+                        locationTag = $location.tag;
+                    }
+                    
+                }
             }
-            friendsList[key].push(friend);
+            if (!locationTag) return;
+
+            if (!friendsList[locationTag]) {
+                friendsList[locationTag] = [];
+            }
+            friendsList[locationTag].push(friend);
         });
 
         const sortedFriendsList = [];
@@ -23438,6 +23458,9 @@ console.log(`isLinux: ${LINUX}`);
             }
             if ($utils.isRealInstance(friend.ref?.travelingToLocation)) {
                 return friend.ref.travelingToLocation;
+            }
+            if (this.lastLocation.friendList.has(friend.id)) {
+                return this.lastLocation.name;
             }
         }
         return friendsArr[0].ref?.location;
