@@ -292,6 +292,7 @@ console.log(`isLinux: ${LINUX}`);
                 console.error(err);
             }
             await AppApi.SetUserAgent();
+            await this.loadVrcxId();
             this.appVersion = await AppApi.GetVersion();
             await this.compareAppVersion();
             await this.setBranch();
@@ -2684,6 +2685,14 @@ console.log(`isLinux: ${LINUX}`);
             this.branch = 'Stable';
         }
         await configRepository.setString('VRCX_branch', this.branch);
+    };
+
+    $app.data.vrcxId = '';
+    $app.methods.loadVrcxId = async function () {
+        vrcxId = await configRepository.getString(
+            'VRCX_id',
+            crypto.randomUUID()
+        );
     };
 
     $app.methods.updateIsGameRunning = async function (
@@ -9544,7 +9553,8 @@ console.log(`isLinux: ${LINUX}`);
                     }?${type}=${encodeURIComponent(search)}&n=5000`,
                     method: 'GET',
                     headers: {
-                        Referer: 'https://vrcx.app'
+                        Referer: 'https://vrcx.app',
+                        'VRCX-ID': this.vrcxId
                     }
                 });
                 var json = JSON.parse(response.data);
@@ -9620,7 +9630,8 @@ console.log(`isLinux: ${LINUX}`);
                 url: `${url}?authorId=${encodeURIComponent(authorId)}`,
                 method: 'GET',
                 headers: {
-                    Referer: 'https://vrcx.app'
+                    Referer: 'https://vrcx.app',
+                    'VRCX-ID': this.vrcxId
                 }
             });
             var json = JSON.parse(response.data);
