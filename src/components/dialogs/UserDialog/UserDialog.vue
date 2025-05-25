@@ -555,7 +555,7 @@
                                 <template v-if="isRealInstance(userDialog.$location.tag)">
                                     <launch
                                         :location="userDialog.$location.tag"
-                                        @show-launch-dialog="showLaunchDialog"></launch>
+                                        @show-launch-dialog="showLaunchDialog" />
                                     <el-tooltip
                                         placement="top"
                                         :content="t('dialog.user.info.self_invite_tooltip')"
@@ -1716,13 +1716,14 @@
             :send-invite-dialog-visible.sync="sendInviteDialogVisible"
             :invite-message-table="inviteMessageTable"
             :send-invite-dialog="sendInviteDialog"
-            :upload-image="uploadImage" />
+            :upload-image="uploadImage"
+            @closeInviteDialog="closeInviteDialog" />
         <SendInviteRequestDialog
             :send-invite-request-dialog-visible.sync="sendInviteRequestDialogVisible"
             :invite-request-message-table="inviteRequestMessageTable"
             :send-invite-dialog="sendInviteDialog"
             :upload-image="uploadImage"
-            @inviteImageUpload="inviteImageUpload" />
+            @closeInviteDialog="closeInviteDialog" />
         <PreviousInstancesUserDialog
             :previous-instances-user-dialog.sync="previousInstancesUserDialog"
             :shift-held="shiftHeld" />
@@ -1809,6 +1810,7 @@
 
     const API = inject('API');
     const showFullscreenImageDialog = inject('showFullscreenImageDialog');
+    const clearInviteImageUpload = inject('clearInviteImageUpload');
 
     const userImage = inject('userImage');
     const showLaunchDialog = inject('showLaunchDialog');
@@ -1993,7 +1995,6 @@
         'saveUserMemo',
         'setGroupVisibility',
         'leaveGroupPrompt',
-        'clearInviteImageUpload',
         'refreshGalleryTable',
         'refreshVRCPlusIconsTable',
         'refreshStickerTable',
@@ -2033,7 +2034,11 @@
     const favoriteWorldsRef = ref(null);
 
     const sendInviteDialogVisible = ref(false);
-    const sendInviteDialog = ref({ message: '', messageSlot: 0, userId: '', messageType: '', params: {} });
+    const sendInviteDialog = ref({
+        messageSlot: {},
+        userId: '',
+        params: {}
+    });
     const sendInviteRequestDialogVisible = ref(false);
 
     const previousInstancesUserDialog = ref({
@@ -2266,7 +2271,7 @@
         sendInviteDialog.value = {
             params,
             userId,
-            messageType: 'invite'
+            messageSlot: {}
         };
         inviteMessagesRequest.refreshInviteMessageTableData('message');
         clearInviteImageUpload();
@@ -2277,7 +2282,7 @@
         sendInviteDialog.value = {
             params,
             userId,
-            messageType: 'requestInvite'
+            messageSlot: {}
         };
         inviteMessagesRequest.refreshInviteMessageTableData('request');
         clearInviteImageUpload();
@@ -3161,11 +3166,8 @@
     function saveUserMemo(userId, memo) {
         emit('saveUserMemo', userId, memo);
     }
-    function clearInviteImageUpload() {
-        emit('clearInviteImageUpload');
-    }
-    function inviteImageUpload(event) {
-        emit('inviteImageUpload', event);
+    function closeInviteDialog() {
+        clearInviteImageUpload();
     }
     function refreshGalleryTable() {
         emit('refreshGalleryTable');
