@@ -114,9 +114,41 @@ jobs:
           name: Electron-AppImage
           path: "build/VRCX_${{ needs.set_version.outputs.version }}.AppImage"
 
+  build_macos:
+      runs-on: macos-latest
+      needs: [set_version, build_dotnet_linux, build_node]
+
+      steps:
+          - uses: actions/checkout@v4
+
+          - name: Set version
+            run: |
+                echo "${{ needs.set_version.outputs.version }}" > Version
+                cat Version
+          - name: Use Node.js
+            uses: actions/setup-node@v3
+            with:
+                node-version: lts/*
+          - name: Restore dependencies
+            run: npm ci
+          - name: Build Electron-html
+            run: npm run prod-linux
+          - name: Download Electron dotnet artifacts
+            uses: actions/download-artifact@v4
+            with:
+                name: Electron-Release
+                path: build/Electron
+          - name: Build macOS .dmg
+            run: npm run build-electron
+          - name: Upload Electron macOS artifacts
+            uses: actions/upload-artifact@v4
+            with:
+                name: Electron-MacDmg
+                path: 'build/VRCX_${{ needs.set_version.outputs.version }}.dmg'
+
   create_setup:
     runs-on: ubuntu-latest
-    needs: [set_version, build_node, build_dotnet_windows, build_dotnet_linux]
+    needs: [set_version, build_node, build_dotnet_windows, build_dotnet_linux, build_macos]
 
     steps:
       - uses: actions/checkout@v4
@@ -160,10 +192,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: Electron-AppImage
+      
+      - name: Download Electron macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Electron-MacDmg
 
       - name: Generate hashes
         run: |
-          sha256sum "VRCX_${{ needs.set_version.outputs.version }}_Setup.exe" "VRCX_${{ needs.set_version.outputs.version }}.AppImage" > "SHA256SUMS.txt"
+          sha256sum "VRCX_${{ needs.set_version.outputs.version }}_Setup.exe" "VRCX_${{ needs.set_version.outputs.version }}.AppImage" "VRCX_${{ needs.set_version.outputs.version }}.dmg" > "SHA256SUMS.txt"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -181,6 +218,7 @@ jobs:
             VRCX_${{ needs.set_version.outputs.version }}_Setup.exe
             VRCX_${{ needs.set_version.outputs.version }}.zip
             VRCX_${{ needs.set_version.outputs.version }}.AppImage
+            VRCX_${{ needs.set_version.outputs.version }}.dmg
             SHA256SUMS.txt
           github-token: ${{ secrets.GITHUB_TOKEN }}
           release-url: ${{ steps.create_release.outputs.upload_url }}
