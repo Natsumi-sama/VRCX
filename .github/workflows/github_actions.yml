@@ -71,7 +71,30 @@ jobs:
       - name: Upload Electron dotnet artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Electron-Release
+          name: Electron-Release-Linux
+          path: build/Electron
+
+  build_dotnet_macos:
+    runs-on: macos-latest
+    needs: set_version
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+      - name: Set version
+        run: |
+          echo "${{ needs.set_version.outputs.version }}" > Version
+          cat Version
+      - name: Build Electron .NET Application
+        run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64 --self-contained
+      - name: Upload Electron dotnet artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Electron-Release-macOS
           path: build/Electron
 
   build_node:
@@ -104,7 +127,7 @@ jobs:
       - name: Download Electron dotnet artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Electron-Release
+          name: Electron-Release-Linux
           path: build/Electron
       - name: Build AppImage
         run: npm run build-electron
@@ -116,7 +139,7 @@ jobs:
 
   build_macos:
       runs-on: macos-latest
-      needs: [set_version, build_dotnet_linux, build_node]
+      needs: [set_version, build_dotnet_macos]
 
       steps:
           - uses: actions/checkout@v4
@@ -126,18 +149,19 @@ jobs:
                 echo "${{ needs.set_version.outputs.version }}" > Version
                 cat Version
           - name: Use Node.js
-            uses: actions/setup-node@v3
+            uses: actions/setup-node@v4
             with:
-                node-version: lts/*
+              node-version: lts/*
           - name: Restore dependencies
             run: npm ci --arch=x64
           - name: Build Electron-html
             run: npm run prod-linux --arch=x64
+
           - name: Download Electron dotnet artifacts
             uses: actions/download-artifact@v4
             with:
-                name: Electron-Release
-                path: build/Electron
+              name: Electron-Release-macOS
+              path: build/Electron
           - name: Build macOS .dmg
             run: npm run build-electron
           - name: Upload Electron macOS artifacts
@@ -148,7 +172,7 @@ jobs:
 
   create_setup:
     runs-on: ubuntu-latest
-    needs: [set_version, build_node, build_dotnet_windows, build_dotnet_linux, build_macos]
+    needs: [set_version, build_dotnet_windows, build_dotnet_linux, build_dotnet_macos, build_node, build_macos]
 
     steps:
       - uses: actions/checkout@v4
