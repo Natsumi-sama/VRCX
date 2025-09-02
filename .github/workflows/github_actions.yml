@@ -42,9 +42,9 @@ jobs:
           echo "${{ needs.set_version.outputs.version }}" > Version
           cat Version
       - name: Build Cef .NET Application
-        run: dotnet build Dotnet\VRCX-Cef.csproj -p:Configuration=Release -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m --self-contained
+        run: dotnet build Dotnet\VRCX-Cef.csproj -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m --self-contained
       - name: Build Cef .NET Application
-        run: dotnet build DBMerger\DBMerger.csproj -p:Configuration=Release -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m --self-contained
+        run: dotnet build DBMerger\DBMerger.csproj -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m --self-contained
       - name: Upload Cef dotnet artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -66,12 +66,19 @@ jobs:
         run: |
           echo "${{ needs.set_version.outputs.version }}" > Version
           cat Version
-      - name: Build Electron .NET Application
-        run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m --self-contained
-      - name: Upload Electron dotnet artifacts
+      - name: Build Electron x64 .NET Application
+        run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m --self-contained
+      - name: Upload Electron x64 dotnet artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Electron-Release-Linux
+          name: Electron-Release-Linux-x64
+          path: build/Electron
+      - name: Build Electron arm64 .NET Application
+        run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64 --self-contained
+      - name: Upload Electron arm64 dotnet artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Electron-Release-Linux-arm64
           path: build/Electron
 
   build_dotnet_macos:
@@ -89,12 +96,19 @@ jobs:
         run: |
           echo "${{ needs.set_version.outputs.version }}" > Version
           cat Version
-      - name: Build Electron .NET Application
-        run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64 --self-contained
-      - name: Upload Electron dotnet artifacts
+      - name: Build Electron x64 .NET Application
+        run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64 --self-contained
+      - name: Upload Electron x64 .NET artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Electron-Release-macOS
+          name: Electron-Release-macOS-x64
+          path: build/Electron
+      - name: Build Electron arm64 .NET Application
+        run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64 --self-contained
+      - name: Upload Electron arm64 dotnet artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Electron-Release-macOS-arm64
           path: build/Electron
 
   build_node:
@@ -124,18 +138,31 @@ jobs:
 
       - name: Build Electron-html
         run: npm run prod-linux
-      - name: Download Electron dotnet artifacts
+      - name: Download Electron x64 dotnet artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Electron-Release-Linux
+          name: Electron-Release-Linux-x64
           path: build/Electron
-      - name: Build AppImage
+      - name: Build x64 AppImage
         run: npm run build-electron
-      - name: Upload Electron AppImage artifacts
+      - name: Upload Electron x64 AppImage artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Electron-AppImage
-          path: "build/VRCX_${{ needs.set_version.outputs.version }}.AppImage"
+          name: Electron-AppImage-x64
+          path: "build/VRCX_${{ needs.set_version.outputs.version }}_x64.AppImage"
+
+      - name: Download Electron arm64 dotnet artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Electron-Release-Linux-arm64
+          path: build/Electron
+      - name: Build arm64 AppImage
+        run: npm run build-electron-arm64
+      - name: Upload Electron arm64 AppImage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Electron-AppImage-arm64
+          path: "build/VRCX_${{ needs.set_version.outputs.version }}_arm64.AppImage"
 
   build_macos:
       runs-on: macos-latest
@@ -157,18 +184,36 @@ jobs:
           - name: Build Electron-html
             run: npm run prod-linux --arch=x64
 
-          - name: Download Electron dotnet artifacts
+          - name: Download x64 Electron dotnet artifacts
             uses: actions/download-artifact@v4
             with:
-              name: Electron-Release-macOS
+              name: Electron-Release-macOS-x64
               path: build/Electron
-          - name: Build macOS .dmg
+          - name: Build x64 macOS .dmg
             run: npm run build-electron
-          - name: Upload Electron macOS artifacts
+          - name: Upload x64 Electron macOS artifacts
             uses: actions/upload-artifact@v4
             with:
-                name: Electron-MacDmg
-                path: 'build/VRCX_${{ needs.set_version.outputs.version }}.dmg'
+                name: Electron-MacDmg-x64
+                path: 'build/VRCX_${{ needs.set_version.outputs.version }}_x64.dmg'
+
+          - name: Restore dependencies
+            run: npm ci --arch=arm64
+          - name: Build Electron-html
+            run: npm run prod-linux --arch=arm64
+
+          - name: Download arm64 Electron dotnet artifacts
+            uses: actions/download-artifact@v4
+            with:
+              name: Electron-Release-macOS-arm64
+              path: build/Electron
+          - name: Build arm64 macOS .dmg
+            run: npm run build-electron-arm64
+          - name: Upload arm64 Electron macOS artifacts
+            uses: actions/upload-artifact@v4
+            with:
+                name: Electron-MacDmg-arm64
+                path: 'build/VRCX_${{ needs.set_version.outputs.version }}_arm64.dmg'
 
   create_setup:
     runs-on: ubuntu-latest
@@ -212,19 +257,27 @@ jobs:
           mv ${file_name} ../../${file_name}
           echo "Zip FileName: ${file_name}"
 
-      - name: Download Electron AppImage artifacts
+      - name: Download x64 Electron AppImage artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Electron-AppImage
+          name: Electron-AppImage-x64
+      - name: Download arm64 Electron AppImage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Electron-AppImage-arm64
       
-      - name: Download Electron macOS artifacts
+      - name: Download x64 Electron macOS artifacts
         uses: actions/download-artifact@v4
         with:
-          name: Electron-MacDmg
+          name: Electron-MacDmg-x64
+      - name: Download arm64 Electron macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: Electron-MacDmg-arm64
 
       - name: Generate hashes
         run: |
-          sha256sum "VRCX_${{ needs.set_version.outputs.version }}_Setup.exe" "VRCX_${{ needs.set_version.outputs.version }}.AppImage" "VRCX_${{ needs.set_version.outputs.version }}.dmg" > "SHA256SUMS.txt"
+          sha256sum "VRCX_${{ needs.set_version.outputs.version }}_Setup.exe" "VRCX_${{ needs.set_version.outputs.version }}_x64.AppImage" > "SHA256SUMS.txt"
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -241,8 +294,10 @@ jobs:
           files: |
             VRCX_${{ needs.set_version.outputs.version }}_Setup.exe
             VRCX_${{ needs.set_version.outputs.version }}.zip
-            VRCX_${{ needs.set_version.outputs.version }}.AppImage
-            VRCX_${{ needs.set_version.outputs.version }}.dmg
+            VRCX_${{ needs.set_version.outputs.version }}_x64.AppImage
+            VRCX_${{ needs.set_version.outputs.version }}_arm64.AppImage
+            VRCX_${{ needs.set_version.outputs.version }}_x64.dmg
+            VRCX_${{ needs.set_version.outputs.version }}_arm64.dmg
             SHA256SUMS.txt
           github-token: ${{ secrets.GITHUB_TOKEN }}
           release-url: ${{ steps.create_release.outputs.upload_url }}
