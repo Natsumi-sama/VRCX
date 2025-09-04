@@ -65,7 +65,7 @@ jobs:
                   echo "${{ needs.set_version.outputs.version }}" > Version
                   cat Version
             - name: Build Electron x64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:PlatformTarget=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64 --self-contained
+              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:PlatformTarget=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64
             - name: Upload Electron x64 dotnet artifacts
               uses: actions/upload-artifact@v4
               with:
@@ -75,7 +75,7 @@ jobs:
               run: |
                   rm -R build/Electron
             - name: Build Electron arm64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron-arm64.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64 --self-contained
+              run: dotnet build 'Dotnet/VRCX-Electron-arm64.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64
             - name: Upload Electron arm64 dotnet artifacts
               uses: actions/upload-artifact@v4
               with:
@@ -98,7 +98,7 @@ jobs:
                   echo "${{ needs.set_version.outputs.version }}" > Version
                   cat Version
             - name: Build Electron x64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:PlatformTarget=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64 --self-contained
+              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:PlatformTarget=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64
             - name: Upload Electron x64 .NET artifacts
               uses: actions/upload-artifact@v4
               with:
@@ -108,7 +108,7 @@ jobs:
               run: |
                   rm -R build/Electron
             - name: Build Electron arm64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron-arm64.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64 --self-contained
+              run: dotnet build 'Dotnet/VRCX-Electron-arm64.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64
             - name: Upload Electron arm64 dotnet artifacts
               uses: actions/upload-artifact@v4
               with:
