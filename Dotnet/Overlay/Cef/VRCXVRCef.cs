@@ -12,6 +12,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using CefSharp;
 using NLog;
 using Silk.NET.Core.Native;
@@ -33,21 +34,20 @@ namespace VRCX
         private static readonly float[] _rotationRight = { -90f * (float)(Math.PI / 180f), -90f * (float)(Math.PI / 180f), -90f * (float)(Math.PI / 180f) };
         private static OffScreenBrowser _wristOverlay;
         private static OffScreenBrowser _hmdOverlay;
-        private readonly List<string[]> _deviceList;
-        private readonly ReaderWriterLockSlim _deviceListLock;
+        private readonly List<string[]> _deviceList = new();
+        private readonly ReaderWriterLockSlim _deviceListLock = new();
         private bool _active;
         private bool _menuButton;
         private int _overlayHand;
-        private Thread _thread;
+        private readonly Task _task;
+        private CancellationTokenSource _cts;
         private DateTime _nextOverlayUpdate;
 
         private ulong _hmdOverlayHandle;
         private bool _hmdOverlayActive;
-        private bool _hmdOverlayWasActive;
 
         private ulong _wristOverlayHandle;
         private bool _wristOverlayActive;
-        private bool _wristOverlayWasActive;
 
         private DXGI _dxgi;
         private D3D11 _d3d11;
@@ -67,27 +67,31 @@ namespace VRCX
 
         public VRCXVRCef()
         {
-            _deviceListLock = new ReaderWriterLockSlim();
-            _deviceList = new List<string[]>();
-            _thread = new Thread(ThreadLoop)
-            {
-                IsBackground = true
-            };
         }
 
         // NOTE
         // 메모리 릭 때문에 미리 생성해놓고 계속 사용함
         public override void Init()
         {
-            _thread.Start();
+            _wristOverlay = new OffScreenBrowser(
+                Program.LaunchDebug ? "http://localhost:9000/vr.html?wrist" : "file://vrcx/vr.html?wrist",
+                512,
+                512
+            );
+            _hmdOverlay = new OffScreenBrowser(
+                Program.LaunchDebug ? "http://localhost:9000/vr.html?hmd" : "file://vrcx/vr.html?hmd",
+                1024,
+                1024
+            );
         }
 
         public override void Exit()
         {
-            var thread = _thread;
-            _thread = null;
-            thread?.Interrupt();
-            thread?.Join();
+            _active = false;
+            _cts?.Cancel();
+            _task?.Wait();
+            _cts?.Dispose();
+            OVRShutdown();
         }
 
         public override void Restart()
@@ -99,23 +103,92 @@ namespace VRCX
             MainForm.Instance.Browser.ExecuteScriptAsync("console.log('VRCXVR Restarted');");
         }
 
+        private void OVRShutdown()
+        {
+            logger.Info("VRCXVRCef OVRShutdown called");
+            _deviceListLock.EnterWriteLock();
+            try
+            {
+                _deviceList.Clear();
+            }
+            finally
+            {
+                _deviceListLock.ExitWriteLock();
+            }
+            IsHmdAfk = false;
+            if (OpenVR.Overlay != null && _wristOverlayHandle != 0)
+            {
+                OpenVR.Overlay.DestroyOverlay(_wristOverlayHandle);
+                _wristOverlayHandle = 0;
+            }
+            if (OpenVR.Overlay != null && _hmdOverlayHandle != 0)
+            {
+                OpenVR.Overlay.DestroyOverlay(_hmdOverlayHandle);
+                _hmdOverlayHandle = 0;
+            }
+            OpenVR.Shutdown();
+            Dispose();
+        }
+
+        private void Dispose()
+        {
+            logger.Info("VRCXVRCef Dispose");
+            _wristOverlay?.ClearRender();
+            _hmdOverlay?.ClearRender();
+            unsafe
+            {
+                _dxgi?.Dispose();
+                _d3d11?.Dispose();
+                if ((IntPtr)_factory.Handle != IntPtr.Zero)
+                {
+                    _factory.Dispose();
+                    _factory = default;
+                }
+                if ((IntPtr)_multithread.Handle != IntPtr.Zero)
+                {
+                    _multithread.Dispose();
+                    _multithread = default;
+                }
+                if ((IntPtr)_device.Handle != IntPtr.Zero)
+                {
+                    _device.Dispose();
+                    _device = default;
+                }
+                if ((IntPtr)_deviceContext.Handle != IntPtr.Zero)
+                {
+                    _deviceContext.Dispose();
+                    _deviceContext = default;
+                }
+                if ((IntPtr)_adapter.Handle != IntPtr.Zero)
+                {
+                    _adapter.Dispose();
+                    _adapter = default;
+                }
+                if ((IntPtr)_texture1.Handle != IntPtr.Zero)
+                {
+                    _texture1.Dispose();
+                    _texture1 = default;
+                }
+                if ((IntPtr)_texture2.Handle != IntPtr.Zero)
+                {
+                    _texture2.Dispose();
+                    _texture2 = default;
+                }
+            }
+        }
+
         private void SetupTextures()
         {
             unsafe
             {
-                _dxgi?.Dispose();
+                Dispose();
                 _dxgi = DXGI.GetApi(null);
-                _d3d11?.Dispose();
                 _d3d11 = D3D11.GetApi(null);
 
-                _factory.Dispose();
                 SilkMarshal.ThrowHResult(_dxgi.CreateDXGIFactory<IDXGIFactory2>(out _factory));
-                _adapter.Dispose();
                 SilkMarshal.ThrowHResult(_factory.EnumAdapters((uint)OpenVR.System.GetD3D9AdapterIndex(),
                     ref _adapter));
 
-                _device.Dispose();
-                _deviceContext.Dispose();
                 SilkMarshal.ThrowHResult
                 (
                     _d3d11.CreateDevice
@@ -139,7 +212,6 @@ namespace VRCX
                 if (Program.LaunchDebug)
                     _device.SetInfoQueueCallback(msg => logger.Info(SilkMarshal.PtrToString((nint)msg.PDescription)!));
 
-                _texture1.Dispose();
                 SilkMarshal.ThrowHResult
                 (
                     _device.CreateTexture2D(new Texture2DDesc
@@ -159,7 +231,6 @@ namespace VRCX
                 );
                 _wristOverlay?.UpdateRender(_device, _deviceContext, _texture1);
 
-                _texture2.Dispose();
                 SilkMarshal.ThrowHResult
                 (
                     _device.CreateTexture2D(new Texture2DDesc
@@ -181,7 +252,7 @@ namespace VRCX
             }
         }
 
-        private void ThreadLoop()
+        private async Task ThreadLoop()
         {
             var active = false;
             var e = new VREvent_t();
@@ -193,27 +264,11 @@ namespace VRCX
             var overlayVisible2 = false;
             var dashboardHandle = 0UL;
 
-            _wristOverlay = new OffScreenBrowser(
-                Program.LaunchDebug ? "http://localhost:9000/vr.html?wrist" : "file://vrcx/vr.html?wrist",
-                512,
-                512
-            );
-
-            _hmdOverlay = new OffScreenBrowser(
-                Program.LaunchDebug ? "http://localhost:9000/vr.html?hmd" : "file://vrcx/vr.html?hmd",
-                1024,
-                1024
-            );
-
-            while (_thread != null)
+            while (!_cts.IsCancellationRequested)
             {
-                try
-                {
-                    Thread.Sleep(32);
-                }
-                catch (ThreadInterruptedException)
-                {
-                }
+                Task.Delay(32, _cts.Token).Wait();
+                if (_cts.IsCancellationRequested)
+                    return;
 
                 if (_active)
                 {
@@ -221,12 +276,10 @@ namespace VRCX
                     if (system == null)
                     {
                         if (DateTime.UtcNow.CompareTo(nextInit) <= 0)
-                        {
                             continue;
-                        }
 
-                        var _err = EVRInitError.None;
-                        system = OpenVR.Init(ref _err, EVRApplicationType.VRApplication_Background);
+                        var err = EVRInitError.None;
+                        system = OpenVR.Init(ref err, EVRApplicationType.VRApplication_Background);
                         nextInit = DateTime.UtcNow.AddSeconds(5);
                         if (system == null)
                         {
@@ -243,13 +296,10 @@ namespace VRCX
                         if (type == EVREventType.VREvent_Quit)
                         {
                             active = false;
-                            IsHmdAfk = false;
-                            OpenVR.Shutdown();
+                            OVRShutdown();
                             nextInit = DateTime.UtcNow.AddSeconds(10);
                             system = null;
-
-                            _wristOverlayHandle = 0;
-                            _hmdOverlayHandle = 0;
+                            
                             break;
                         }
                     }
@@ -309,55 +359,46 @@ namespace VRCX
                         }
                     }
                 }
-                else if (active)
+                if (!_active && active)
                 {
                     active = false;
-                    IsHmdAfk = false;
-                    OpenVR.Shutdown();
-                    _deviceListLock.EnterWriteLock();
-                    try
-                    {
-                        _deviceList.Clear();
-                    }
-                    finally
-                    {
-                        _deviceListLock.ExitWriteLock();
-                    }
+                    OVRShutdown();
                 }
             }
-
-            _hmdOverlay?.Dispose();
-            _wristOverlay?.Dispose();
-            _texture2.Dispose();
-            _texture1.Dispose();
-            _device.Dispose();
-            _adapter.Dispose();
-            _factory.Dispose();
+            OVRShutdown();
+            logger.Info("VRCXVRCef ThreadLoop exited");
         }
 
         public override void SetActive(bool active, bool hmdOverlay, bool wristOverlay, bool menuButton, int overlayHand)
         {
-            _active = active;
-            _hmdOverlayActive = hmdOverlay;
-            _wristOverlayActive = wristOverlay;
-            _menuButton = menuButton;
-            _overlayHand = overlayHand;
-
-            if (_hmdOverlayActive != _hmdOverlayWasActive && _hmdOverlayHandle != 0)
+            if (!hmdOverlay && _hmdOverlayActive && _hmdOverlayHandle != 0)
             {
                 OpenVR.Overlay.DestroyOverlay(_hmdOverlayHandle);
                 _hmdOverlayHandle = 0;
             }
 
-            _hmdOverlayWasActive = _hmdOverlayActive;
-
-            if (_wristOverlayActive != _wristOverlayWasActive && _wristOverlayHandle != 0)
+            if (!wristOverlay && _wristOverlayActive && _wristOverlayHandle != 0)
             {
                 OpenVR.Overlay.DestroyOverlay(_wristOverlayHandle);
                 _wristOverlayHandle = 0;
             }
 
-            _wristOverlayWasActive = _wristOverlayActive;
+            if (!active && _active)
+            {
+                Exit();
+            }
+            
+            if (active && !_active)
+            {
+                _cts = new CancellationTokenSource();
+                Task.Run(ThreadLoop, _cts.Token);
+            }
+
+            _active = active;
+            _hmdOverlayActive = hmdOverlay;
+            _wristOverlayActive = wristOverlay;
+            _menuButton = menuButton;
+            _overlayHand = overlayHand;
         }
 
         public override void Refresh()
@@ -597,8 +638,7 @@ namespace VRCX
             }
 
             var e = new VREvent_t();
-
-            while (overlay.PollNextOverlayEvent(dashboardHandle, ref e, (uint)Marshal.SizeOf(e)))
+            while (_active && overlay.PollNextOverlayEvent(dashboardHandle, ref e, (uint)Marshal.SizeOf(e)))
             {
                 var type = (EVREventType)e.eventType;
                 if (type == EVREventType.VREvent_MouseMove)
@@ -621,7 +661,7 @@ namespace VRCX
                 }
             }
 
-            if (dashboardVisible)
+            if (_active && dashboardVisible)
             {
                 unsafe
                 {

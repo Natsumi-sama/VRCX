@@ -64,6 +64,17 @@ namespace VRCX
                 MiscFlags = 0
             }, ref _query);
         }
+        
+        public void ClearRender()
+        {
+            _deviceContext = default;
+            _device1.Dispose();
+            _device1 = default;
+            _renderTarget.Dispose();
+            _renderTarget = default;
+            _query.Dispose();
+            _query = default;
+        }
 
         public new void Dispose()
         {
@@ -115,6 +126,9 @@ namespace VRCX
                 _deviceContext.CopyResource(_renderTarget, cefTexture);
                 _deviceContext.End(_query);
                 _deviceContext.Flush();
+                
+                if ((IntPtr)_deviceContext.Handle == IntPtr.Zero)
+                    return;
                 
                 while (_deviceContext.GetData(_query, IntPtr.Zero.ToPointer(), 0, 0) == 1)
                 {
