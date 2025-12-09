@@ -246,18 +246,18 @@ namespace VRCX
                         if (overlay != null)
                         {
                             var dashboardVisible = overlay.IsDashboardVisible();
-                            var err = ProcessDashboard(overlay, ref dashboardHandle, dashboardVisible);
-                            if (err != EVROverlayError.None &&
-                                dashboardHandle != 0)
-                            {
-                                overlay.DestroyOverlay(dashboardHandle);
-                                dashboardHandle = 0;
-                                logger.Error(err);
-                            }
+                            // var err = ProcessDashboard(overlay, ref dashboardHandle, dashboardVisible);
+                            // if (err != EVROverlayError.None &&
+                            //     dashboardHandle != 0)
+                            // {
+                            //     overlay.DestroyOverlay(dashboardHandle);
+                            //     dashboardHandle = 0;
+                            //     logger.Error(err);
+                            // }
 
                             if (_wristOverlayActive)
                             {
-                                err = ProcessOverlay1(overlay, ref _wristOverlayHandle, ref overlayVisible1,
+                                var err = ProcessOverlay1(overlay, ref _wristOverlayHandle, ref overlayVisible1,
                                     dashboardVisible, overlayIndex);
                                 if (err != EVROverlayError.None &&
                                     _wristOverlayHandle != 0)
@@ -270,7 +270,7 @@ namespace VRCX
 
                             if (_hmdOverlayActive)
                             {
-                                err = ProcessOverlay2(overlay, ref _hmdOverlayHandle, ref overlayVisible2,
+                                var err = ProcessOverlay2(overlay, ref _hmdOverlayHandle, ref overlayVisible2,
                                     dashboardVisible);
                                 if (err != EVROverlayError.None &&
                                     _hmdOverlayHandle != 0)
@@ -586,7 +586,8 @@ namespace VRCX
                     };
                     var bounds = new VRTextureBounds_t
                     {
-                        uMin = 0f, uMax = 1f,
+                        uMin = 0f,
+                        uMax = 1f,
                         vMin = (float)(TOTAL_HEIGHT - HMD_HEIGHT) / TOTAL_HEIGHT,
                         vMax = 1f
                     };
@@ -788,7 +789,8 @@ namespace VRCX
                 
                 var bounds = new VRTextureBounds_t
                 {
-                    uMin = 0f, uMax = 1f,
+                    uMin = 0f,
+                    uMax = 1f,
                     vMin = (float)(TOTAL_HEIGHT - HMD_HEIGHT) / TOTAL_HEIGHT,
                     vMax = 1f
                 };

@@ -65,8 +65,7 @@ declare global {
             ) => void;
             onBrowserFocus: (Function: (event: any) => void) => void;
             restartApp: () => Promise<void>;
-            getWristOverlayWindow: () => Promise<boolean>;
-            getHmdOverlayWindow: () => Promise<boolean>;
+            getOverlayWindow: () => Promise<boolean>;
             updateVr: (
                 active: bool,
                 hmdOverlay: bool,

@@ -266,16 +266,16 @@ namespace VRCX
                         if (overlay != null)
                         {
                             var dashboardVisible = overlay.IsDashboardVisible();
-                            var err = ProcessDashboard(overlay, ref dashboardHandle, dashboardVisible);
-                            if (err != EVROverlayError.None &&
-                                dashboardHandle != 0)
-                            {
-                                overlay.DestroyOverlay(dashboardHandle);
-                                dashboardHandle = 0;
-                                logger.Error(err);
-                            }
+                            // var err = ProcessDashboard(overlay, ref dashboardHandle, dashboardVisible);
+                            // if (err != EVROverlayError.None &&
+                            //     dashboardHandle != 0)
+                            // {
+                            //     overlay.DestroyOverlay(dashboardHandle);
+                            //     dashboardHandle = 0;
+                            //     logger.Error(err);
+                            // }
 
-                            err = ProcessOverlay1(overlay, ref overlayHandle1, ref overlayVisible1, dashboardVisible, overlayIndex);
+                            var err = ProcessOverlay1(overlay, ref overlayHandle1, ref overlayVisible1, dashboardVisible, overlayIndex);
                             if (err != EVROverlayError.None &&
                                 overlayHandle1 != 0)
                             {
@@ -563,31 +563,6 @@ namespace VRCX
                     {
                         return err;
                     }
-                }
-            }
-
-            var e = new VREvent_t();
-
-            while (overlay.PollNextOverlayEvent(dashboardHandle, ref e, (uint)Marshal.SizeOf(e)))
-            {
-                var type = (EVREventType)e.eventType;
-                if (type == EVREventType.VREvent_MouseMove)
-                {
-                    var m = e.data.mouse;
-                    var s = _wristOverlay.Size;
-                    _wristOverlay.GetBrowserHost().SendMouseMoveEvent((int)(m.x * s.Width), s.Height - (int)(m.y * s.Height), false, CefEventFlags.None);
-                }
-                else if (type == EVREventType.VREvent_MouseButtonDown)
-                {
-                    var m = e.data.mouse;
-                    var s = _wristOverlay.Size;
-                    _wristOverlay.GetBrowserHost().SendMouseClickEvent((int)(m.x * s.Width), s.Height - (int)(m.y * s.Height), MouseButtonType.Left, false, 1, CefEventFlags.LeftMouseButton);
-                }
-                else if (type == EVREventType.VREvent_MouseButtonUp)
-                {
-                    var m = e.data.mouse;
-                    var s = _wristOverlay.Size;
-                    _wristOverlay.GetBrowserHost().SendMouseClickEvent((int)(m.x * s.Width), s.Height - (int)(m.y * s.Height), MouseButtonType.Left, true, 1, CefEventFlags.None);
                 }
             }
 
