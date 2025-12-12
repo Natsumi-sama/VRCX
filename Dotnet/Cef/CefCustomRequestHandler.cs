@@ -18,7 +18,8 @@ namespace VRCX
         {
             if (Program.LaunchDebug ||
                 request.Url.StartsWith("file://vrcx/") ||
-                request.Url.StartsWith("chrome-extension://"))
+                request.Url.StartsWith("chrome-extension://") ||
+                request.Url.StartsWith("http://127.0.0.1"))
                 return false;
             
             _logger.Error("Blocking navigation to: {Url}", request.Url);

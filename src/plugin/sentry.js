@@ -48,7 +48,8 @@ export async function initSentry(app) {
             release: version,
             replaysSessionSampleRate: 0,
             replaysOnErrorSampleRate: 1.0,
-            tracesSampleRate: 0.001,
+            tracesSampleRate: 1.0,
+            profilesSampleRate: 1.0,
             beforeSend(event, hint) {
                 const error = hint.originalException;
                 if (error && typeof error.message === 'string') {
@@ -102,6 +103,7 @@ export async function initSentry(app) {
                     blockAllMedia: true
                 }),
                 Sentry.browserTracingIntegration({ router }),
+                Sentry.browserProfilingIntegration(),
                 Sentry.vueIntegration({
                     tracingOptions: {
                         trackComponents: true

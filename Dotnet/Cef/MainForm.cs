@@ -54,7 +54,7 @@ namespace VRCX
                 logger.Error(ex);
             }
 
-            Browser = new ChromiumWebBrowser(Program.LaunchDebug ? "http://localhost:9000/index.html" : "file://vrcx/index.html")
+            Browser = new ChromiumWebBrowser(Program.LaunchDebug ? "http://localhost:9000/index.html" : "http://127.0.0.1:3594/index.html")
             {
                 DragHandler = new CustomDragHandler(),
                 MenuHandler = new CustomMenuHandler(),

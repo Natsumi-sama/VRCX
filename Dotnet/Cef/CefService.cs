@@ -1,10 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Threading.Tasks;
 using CefSharp;
 using CefSharp.SchemeHandler;
 using CefSharp.WinForms;
+using EmbedIO;
+using EmbedIO.Actions;
+using EmbedIO.Files;
+using EmbedIO.Routing;
+using EmbedIO.WebApi;
 using NLog;
 
 namespace VRCX
@@ -20,9 +27,29 @@ namespace VRCX
             _lastCefVersionPath = Path.Join(Program.AppDataDirectory, "LastCefVersion");
             Instance = new CefService();
         }
+        
+        private static WebServer _webServer;
+        private static void CreateWebServer()
+        {
+            _webServer = new WebServer(o => o
+                .WithUrlPrefix("http://127.0.0.1:3594")
+                .WithMode(HttpListenerMode.EmbedIO))
+                .WithModule(new ActionModule("/index.html", HttpVerbs.Any, ctx =>
+                {
+                    ctx.Response.Headers.Add("Document-Policy", "js-profiling");
+                    var filePath = Path.Join(Program.BaseDirectory, "html", "index.html");
+                    return ctx.SendStringAsync(File.ReadAllText(filePath), MimeType.Html, Encoding.UTF8);
+                }))
+                .WithStaticFolder("/", "html", true, m => m
+                    .WithContentCaching(true));
+            
+            _webServer.StateChanged += (_, e) => logger.Info("WebServer State: {0}", e.NewState);
+            _webServer.RunAsync();
+        }
 
         internal void Init()
         {
+            CreateWebServer();
             var userDataDir = Path.Join(Program.AppDataDirectory, "userdata");
             // delete userdata if Cef version has been downgraded, fixes VRCX not opening after a downgrade
             CheckCefVersion(userDataDir);
@@ -40,17 +67,17 @@ namespace VRCX
                 BackgroundColor = 0xFF101010
             };
 
-            cefSettings.RegisterScheme(new CefCustomScheme
-            {
-                SchemeName = "file",
-                DomainName = "vrcx",
-                SchemeHandlerFactory = new FolderSchemeHandlerFactory(
-                    Path.Join(Program.BaseDirectory, "html"),
-                    "file",
-                    defaultPage: "index.html"
-                ),
-                IsLocal = true
-            });
+            // cefSettings.RegisterScheme(new CefCustomScheme
+            // {
+            //     SchemeName = "file",
+            //     DomainName = "vrcx",
+            //     SchemeHandlerFactory = new FolderSchemeHandlerFactory(
+            //         Path.Join(Program.BaseDirectory, "html"),
+            //         "file",
+            //         defaultPage: "index.html"
+            //     ),
+            //     IsLocal = true
+            // });
 
             // cefSettings.CefCommandLineArgs.Add("ignore-certificate-errors");
             // cefSettings.CefCommandLineArgs.Add("disable-plugins");
@@ -171,6 +198,7 @@ namespace VRCX
 
         internal void Exit()
         {
+            _webServer?.Dispose();
             Cef.Shutdown();
         }
     }
