@@ -1773,23 +1773,9 @@
 
     async function updateVrElectronLoop() {
         try {
-            const wristOverlayQueue = await AppApiVr.GetExecuteVrFeedFunctionQueue();
-            if (wristOverlayQueue) {
-                wristOverlayQueue.forEach((item) => {
-                    // item[0] is the function name, item[1] is already an object
-                    const fullFunctionName = item[0];
-                    const jsonArg = item[1];
-
-                    if (typeof window.$vr === 'object' && typeof window.$vr[fullFunctionName] === 'function') {
-                        window.$vr[fullFunctionName](jsonArg);
-                    } else {
-                        console.error(`$vr.${fullFunctionName} is not defined or is not a function`);
-                    }
-                });
-            }
-            const hmdOverlayQueue = await AppApiVr.GetExecuteVrOverlayFunctionQueue();
-            if (hmdOverlayQueue) {
-                hmdOverlayQueue.forEach((item) => {
+            const overlayQueue = await AppApiVr.GetExecuteVrOverlayFunctionQueue();
+            if (overlayQueue) {
+                overlayQueue.forEach((item) => {
                     // item[0] is the function name, item[1] is already an object
                     const fullFunctionName = item[0];
                     const jsonArg = item[1];

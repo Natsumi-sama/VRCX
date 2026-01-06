@@ -51,11 +51,10 @@ namespace VRCX
         private int SHARED_FRAME_WIDTH = Math.Max(WRIST_FRAME_WIDTH, HMD_FRAME_WIDTH);
         private const int SHARED_FRAME_HEIGHT = WRIST_FRAME_HEIGHT + HMD_FRAME_HEIGHT;
         private byte[] frameBuffer = new byte[SHARED_FRAME_SIZE];
-        
+
         private MemoryMappedFile _overlayMMF;
         private MemoryMappedViewAccessor _overlayAccessor;
-        private readonly ConcurrentQueue<KeyValuePair<string, string>> _wristFeedFunctionQueue = new ConcurrentQueue<KeyValuePair<string, string>>();
-        private readonly ConcurrentQueue<KeyValuePair<string, string>> _hmdFeedFunctionQueue = new ConcurrentQueue<KeyValuePair<string, string>>();
+        private readonly ConcurrentQueue<KeyValuePair<string, string>> _overlayFunctionQueue = new ConcurrentQueue<KeyValuePair<string, string>>();
 
         static VRCXVRElectron()
         {
@@ -345,6 +344,11 @@ namespace VRCX
                 GLContextX11.Cleanup();
                 GLContextWayland.Cleanup();
             }
+        }
+
+        public override bool IsActive()
+        {
+            return _active;
         }
 
         public override void Refresh()
@@ -837,23 +841,9 @@ namespace VRCX
             return err;
         }
 
-        public override ConcurrentQueue<KeyValuePair<string, string>> GetExecuteVrFeedFunctionQueue()
-        {
-            return _wristFeedFunctionQueue;
-        }
-
-        public override void ExecuteVrFeedFunction(string function, string json)
-        {
-            //if (_hmdOverlaySocket == null || !_hmdOverlaySocket.Connected) return;
-            // if (_wristOverlay.IsLoading)
-            //     Restart();
-
-            _wristFeedFunctionQueue.Enqueue(new KeyValuePair<string, string>(function, json));
-        }
-
         public override ConcurrentQueue<KeyValuePair<string, string>> GetExecuteVrOverlayFunctionQueue()
         {
-            return _hmdFeedFunctionQueue;
+            return _overlayFunctionQueue;
         }
 
         public override void ExecuteVrOverlayFunction(string function, string json)
@@ -862,7 +852,7 @@ namespace VRCX
             // if (_hmdOverlay.IsLoading)
             //     Restart();
 
-            _hmdFeedFunctionQueue.Enqueue(new KeyValuePair<string, string>(function, json));
+            _overlayFunctionQueue.Enqueue(new KeyValuePair<string, string>(function, json));
         }
     }
 }

@@ -12,12 +12,12 @@ using Silk.NET.Core.Native;
 using Silk.NET.Direct3D11;
 using Silk.NET.DXGI;
 using Valve.VR;
+using VRCX.Overlay;
 
 namespace VRCX
 {
     public class VRCXVRCef : VRCXVRInterface
     {
-        public static VRCXVRInterface Instance;
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private static readonly float[] _rotation = { 0f, 0f, 0f };
         private static readonly float[] _translation = { 0f, 0f, 0f };
@@ -29,6 +29,7 @@ namespace VRCX
         private static OffScreenBrowser _sharedOverlay;
         private readonly List<string[]> _deviceList;
         private readonly ReaderWriterLockSlim _deviceListLock;
+        private readonly bool _isLegacy;
         private bool _active;
         private bool _menuButton;
         private int _overlayHand;
@@ -42,7 +43,7 @@ namespace VRCX
         private ulong _wristOverlayHandle;
         private bool _wristOverlayActive;
         private bool _wristOverlayWasActive;
-        
+
         private const int HMD_HEIGHT = 1024;
         private const int WRIST_SIZE = 512;
         private const int TOTAL_WIDTH = 1024;
@@ -58,13 +59,9 @@ namespace VRCX
 
         private ComPtr<ID3D11Texture2D> _sharedTexture;
 
-        static VRCXVRCef()
+        public VRCXVRCef(bool isLegacy)
         {
-            Instance = new VRCXVRCef();
-        }
-
-        public VRCXVRCef()
-        {
+            _isLegacy = isLegacy;
             _deviceListLock = new ReaderWriterLockSlim();
             _deviceList = new List<string[]>();
             _thread = new Thread(ThreadLoop)
@@ -73,8 +70,6 @@ namespace VRCX
             };
         }
 
-        // NOTE
-        // 메모리 릭 때문에 미리 생성해놓고 계속 사용함
         public override void Init()
         {
             _thread.Start();
@@ -91,10 +86,8 @@ namespace VRCX
         public override void Restart()
         {
             Exit();
-            Instance = new VRCXVRCef();
-            Instance.Init();
-            Program.VRCXVRInstance = Instance;
-            MainForm.Instance.Browser.ExecuteScriptAsync("console.log('VRCXVR Restarted');");
+            OverlayProgram.VRCXVRInstance = new VRCXVRCef(_isLegacy);
+            OverlayProgram.VRCXVRInstance.Init();
         }
 
         private void SetupTextures()
@@ -114,7 +107,7 @@ namespace VRCX
 
                 _device.Dispose();
                 _deviceContext.Dispose();
-                
+
                 SilkMarshal.ThrowHResult
                 (
                     _d3d11.CreateDevice
@@ -131,12 +124,12 @@ namespace VRCX
                         ref _deviceContext
                     )
                 );
-                
+
                 if ((IntPtr)_sharedTexture.Handle != IntPtr.Zero)
                 {
                     _sharedTexture.Dispose();
                 }
-    
+
                 SilkMarshal.ThrowHResult
                 (
                     _device.CreateTexture2D(new Texture2DDesc
@@ -146,13 +139,20 @@ namespace VRCX
                         MipLevels = 1,
                         ArraySize = 1,
                         Format = Format.FormatB8G8R8A8Unorm,
-                        SampleDesc = new SampleDesc { Count = 1, Quality = 0 },
-                        BindFlags = (uint)BindFlag.ShaderResource
+                        SampleDesc = new SampleDesc
+                        {
+                            Count = 1,
+                            Quality = 0
+                        },
+                        BindFlags = (uint)BindFlag.ShaderResource,
+                        CPUAccessFlags = _isLegacy ? (uint)CpuAccessFlag.Write : (uint)CpuAccessFlag.None,
+                        Usage = _isLegacy ? Usage.Dynamic : Usage.Default
                     }, null, ref _sharedTexture)
                 );
-                
+
+                // new
                 _sharedOverlay?.UpdateRender(_device, _deviceContext, _sharedTexture);
-                
+
                 _multithread = _device.QueryInterface<ID3D11Multithread>();
                 _multithread.SetMultithreadProtected(true);
 
@@ -172,15 +172,18 @@ namespace VRCX
             var overlayVisible1 = false;
             var overlayVisible2 = false;
             var dashboardHandle = 0UL;
-            
+
             _sharedOverlay = new OffScreenBrowser(
                 Program.LaunchDebug ? "http://localhost:9000/vr.html" : "file://vrcx/vr.html",
                 TOTAL_WIDTH,
-                TOTAL_HEIGHT
+                TOTAL_HEIGHT,
+                _isLegacy
             );
 
             while (_thread != null)
             {
+                if (_isLegacy && (_wristOverlayActive || _hmdOverlayActive))
+                    _sharedOverlay.RenderToTexture(_deviceContext, _sharedTexture);
                 try
                 {
                     Thread.Sleep(32);
@@ -299,11 +302,11 @@ namespace VRCX
                     }
                 }
             }
-            
+
             _device.Dispose();
             _adapter.Dispose();
             _factory.Dispose();
-            
+
             _sharedOverlay?.Dispose();
             _sharedOverlay = null;
             _sharedTexture.Dispose();
@@ -337,6 +340,11 @@ namespace VRCX
             }
 
             _wristOverlayWasActive = _wristOverlayActive;
+        }
+
+        public override bool IsActive()
+        {
+            return _active;
         }
 
         public override void Refresh()
@@ -388,7 +396,12 @@ namespace VRCX
                         if (isHmdAfk != IsHmdAfk)
                         {
                             IsHmdAfk = isHmdAfk;
-                            Program.AppApiInstance.CheckGameRunning();
+                            var message = new OverlayMessage
+                            {
+                                Type = OverlayMessageType.IsHmdAfk,
+                                Data = IsHmdAfk.ToString()
+                            };
+                            OverlayClient.SendMessage(message);
                         }
 
                         var headsetErr = ETrackedPropertyError.TrackedProp_Success;
@@ -575,7 +588,7 @@ namespace VRCX
             }
 
             var e = new VREvent_t();
-            
+
             if (dashboardVisible)
             {
                 unsafe
@@ -678,7 +691,7 @@ namespace VRCX
             if (!dashboardVisible && DateTime.UtcNow.CompareTo(_nextOverlayUpdate) <= 0)
             {
                 unsafe
-                {
+                {                   
                     var texture = new Texture_t
                     {
                         handle = (IntPtr)_sharedTexture.Handle
@@ -783,10 +796,13 @@ namespace VRCX
             {
                 unsafe
                 {
-                    var texture = new Texture_t { handle = (IntPtr)_sharedTexture.Handle };
+                    var texture = new Texture_t
+                    {
+                        handle = (IntPtr)_sharedTexture.Handle
+                    };
                     err = overlay.SetOverlayTexture(overlayHandle, ref texture);
                 }
-                
+
                 var bounds = new VRTextureBounds_t
                 {
                     uMin = 0f,
@@ -816,17 +832,6 @@ namespace VRCX
             return err;
         }
 
-        public override ConcurrentQueue<KeyValuePair<string, string>> GetExecuteVrFeedFunctionQueue()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void ExecuteVrFeedFunction(string function, string json)
-        {
-            if (_sharedOverlay == null) return;
-            _sharedOverlay.ExecuteScriptAsync($"$vr.{function}", json);
-        }
-
         public override ConcurrentQueue<KeyValuePair<string, string>> GetExecuteVrOverlayFunctionQueue()
         {
             throw new NotImplementedException();
@@ -834,7 +839,9 @@ namespace VRCX
 
         public override void ExecuteVrOverlayFunction(string function, string json)
         {
-            if (_sharedOverlay == null) return;
+            if (_sharedOverlay == null || _sharedOverlay.IsLoading || !_sharedOverlay.CanExecuteJavascriptInMainFrame)
+                return;
+
             _sharedOverlay.ExecuteScriptAsync($"$vr.{function}", json);
         }
     }
