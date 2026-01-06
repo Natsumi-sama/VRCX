@@ -47,8 +47,8 @@ namespace VRCX
         private const int HMD_FRAME_HEIGHT = 1024;
         private const int HMD_FRAME_SIZE = HMD_FRAME_WIDTH * HMD_FRAME_HEIGHT * 4; // RGBA
 
-        private const int SHARED_FRAME_SIZE = WRIST_FRAME_SIZE + HMD_FRAME_SIZE;
-        private int SHARED_FRAME_WIDTH = Math.Max(WRIST_FRAME_WIDTH, HMD_FRAME_WIDTH);
+        private const int SHARED_FRAME_SIZE = SHARED_FRAME_WIDTH * SHARED_FRAME_HEIGHT * 4;
+        private const int SHARED_FRAME_WIDTH = 1024;
         private const int SHARED_FRAME_HEIGHT = WRIST_FRAME_HEIGHT + HMD_FRAME_HEIGHT;
         private byte[] frameBuffer = new byte[SHARED_FRAME_SIZE];
 
