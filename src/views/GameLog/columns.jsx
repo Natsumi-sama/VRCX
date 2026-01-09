@@ -94,21 +94,8 @@ export const createColumns = ({ getCreatedAt, onDelete, onDeletePrompt }) => {
                 const isLink =
                     Boolean(original.location) && original.type !== 'Location';
 
-                const feedColors = {
-                    Notification: 'text-yellow-500 border-yellow-500',
-                    OnPlayerJoined: 'text-green-500 border-green-500',
-                    OnPlayerLeft: 'text-red-500 border-red-500',
-                    VideoPlay: 'text-yellow-500 border-yellow-500',
-                    Event: 'text-yellow-500 border-yellow-500',
-                    Location: 'text-purple-500 border-purple-500', //Same as GPS
-                    ImageLoad: 'text-yellow-500 border-yellow-500', //Never saw this one being used tbh
-                    StringLoad: 'text-yellow-500 border-yellow-500', //Never saw this one being used tbh
-                    External: 'text-yellow-500 border-yellow-500', //Never saw this one being used tbh
-                    PortalSpawn: 'text-purple-500 border-purple-500' //Never saw this one being used tbh
-                };
-
                 return (
-                    <Badge variant="outline" class={feedColors[original.type]}>
+                    <Badge variant="outline" class="text-muted-foreground">
                         <span
                             class={isLink ? 'x-link' : undefined}
                             onClick={() =>
@@ -119,19 +106,6 @@ export const createColumns = ({ getCreatedAt, onDelete, onDeletePrompt }) => {
                         </span>
                     </Badge>
                 );
-                //Old return without the colors
-                // return (
-                //     <Badge variant="outline" class="text-muted-foreground">
-                //         <span
-                //             class={isLink ? 'x-link' : undefined}
-                //             onClick={() =>
-                //                 isLink && showWorldDialog(original.location)
-                //             }
-                //         >
-                //             {label}
-                //         </span>
-                //     </Badge>
-                // );
             }
         },
         {
