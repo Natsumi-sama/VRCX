@@ -73,7 +73,7 @@ public static class OverlayClient
 
     private static void HandleMessage(OverlayMessage message)
     {
-        logger.Info("Message received: {0}", message.Type.ToString());
+        logger.Trace("Message received: {0}", message.Type.ToString());
         switch (message.Type)
         {
             case OverlayMessageType.OverlayConnected:

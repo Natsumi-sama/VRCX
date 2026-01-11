@@ -143,7 +143,7 @@ public class OverlayServer
 
     private async Task HandleMessage(OverlayMessage message)
     {
-        logger.Info($"Overlay IPC message received: {message.Type.ToString()}");
+        logger.Trace($"Overlay IPC message received: {message.Type.ToString()}");
         switch (message.Type)
         {
             case OverlayMessageType.OverlayConnected:
@@ -156,7 +156,6 @@ public class OverlayServer
                 if (MainForm.Instance?.Browser != null && !MainForm.Instance.Browser.IsLoading &&
                     MainForm.Instance.Browser.CanExecuteJavascriptInMainFrame)
                     MainForm.Instance.Browser.ExecuteScriptAsync("window?.$pinia?.vr.vrInit();");
-                logger.Info("window?.$pinia?.vr.vrInit");
                 break;
             
             case OverlayMessageType.IsHmdAfk:
@@ -178,8 +177,7 @@ public class OverlayServer
         {
             var buffer = new ArraySegment<byte>(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(message)));
             var connectedWebSockets = ConnectedWebSockets.Keys;
-            logger.Info(
-                $"Sending message to overlay Clients: {connectedWebSockets.Count}, IPC: {message.Type.ToString()}");
+            logger.Trace($"Sending message to overlay Clients: {connectedWebSockets.Count}, IPC: {message.Type.ToString()}");
             foreach (var webSocket in connectedWebSockets)
             {
                 if (webSocket == null || webSocket.State != WebSocketState.Open)
