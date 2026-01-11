@@ -49,7 +49,6 @@ namespace VRCX
 
 #if !LINUX
             var disableClosing = LaunchArguments.IsUpgrade || // we're upgrading, allow it
-                                        LaunchArguments.IsOverlay || // overlay instance, allow it
                                         !string.IsNullOrEmpty(CommandLineArgsParser.GetArgumentValue(args, CefSharpArguments.SubProcessTypeArgument)); // we're launching a subprocess, allow it
 
             // if we're launching a second instance with same config directory, focus the first instance then exit
@@ -144,9 +143,19 @@ namespace VRCX
 
                 if (commandLine.Contains(SubProcessTypeArgument)) // ignore subprocesses
                     continue;
-                
-                if (commandLine.Contains(VrcxLaunchArguments.Overlay)) // ignore overlay instances
-                    continue;
+
+                if (launchArguments.IsOverlay)
+                {
+                    if (commandLine.Contains(VrcxLaunchArguments.Overlay))
+                    {
+                        Console.WriteLine(@"Another overlay instance is already running. Exiting this instance.");
+                        Environment.Exit(0);
+                    }
+                    continue; // we are an overlay, ignore non-overlay instances
+                }
+
+                if (commandLine.Contains(VrcxLaunchArguments.Overlay))
+                    continue; // we aren't an overlay, ignore overlay instances
 
                 var processArguments = ParseArgs(commandLine.Split(' '));
                 if (processArguments.ConfigDirectory == launchArguments.ConfigDirectory)
