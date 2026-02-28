@@ -187,7 +187,8 @@
     },
     "dependencies": {
         "hazardous": "^0.3.0",
-        "node-api-dotnet": "^0.9.19"
+        "node-api-dotnet": "^0.9.19",
+        "vue-advanced-cropper": "^2.8.9"
     },
     "engines": {
         "node": ">=24.10.0",

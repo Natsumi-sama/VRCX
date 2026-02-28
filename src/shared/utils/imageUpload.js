@@ -22,7 +22,8 @@ function getInputElement(selector) {
 export function handleImageUploadInput(event, options = {}) {
     const {
         inputSelector,
-        maxSize = 100000000,
+        // 20MB
+        maxSize = 20000000,
         acceptPattern = /image.*/,
         tooLargeMessage,
         invalidTypeMessage,
