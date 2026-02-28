@@ -1694,7 +1694,8 @@
             "drone_skin": "Drone Skin",
             "emoji": "Emoji",
             "redeem": "Redeem",
-            "create_animated_emoji": "Animated Emoji Generator"
+            "create_animated_emoji": "Animated Emoji Generator",
+            "crop_image": "Confirm Upload"
         },
         "gallery_select": {
             "header": "Select Image",

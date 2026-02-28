@@ -529,9 +529,19 @@
             <template v-if="avatarDialog.visible">
                 <SetAvatarTagsDialog v-model:setAvatarTagsDialog="setAvatarTagsDialog" />
                 <SetAvatarStylesDialog v-model:setAvatarStylesDialog="setAvatarStylesDialog" />
-                <ChangeAvatarImageDialog
-                    v-model:changeAvatarImageDialogVisible="changeAvatarImageDialogVisible"
-                    v-model:previousImageUrl="previousImageUrl" />
+                <input
+                    id="AvatarImageUploadButton"
+                    type="file"
+                    accept="image/*"
+                    style="display: none"
+                    @change="onFileChangeAvatarImage" />
+                <ImageCropDialog
+                    :open="cropDialogOpen"
+                    :title="t('dialog.change_content_image.avatar')"
+                    :aspect-ratio="4 / 3"
+                    :file="cropDialogFile"
+                    @update:open="cropDialogOpen = $event"
+                    @confirm="onCropConfirmAvatar" />
             </template>
         </div>
     </div>
@@ -597,14 +607,20 @@
         DropdownMenuSeparator,
         DropdownMenuTrigger
     } from '../../ui/dropdown-menu';
+    import {
+        handleImageUploadInput,
+        readFileAsBase64,
+        resizeImageToFitLimits,
+        uploadImageLegacy,
+        withUploadTimeout
+    } from '../../../shared/utils/imageUpload';
     import { avatarModerationRequest, avatarRequest, favoriteRequest } from '../../../api';
-    import { AppDebug } from '../../../service/appConfig.js';
     import { Badge } from '../../ui/badge';
     import { database } from '../../../service/database';
     import { formatJsonVars } from '../../../shared/utils/base/ui';
-    import { handleImageUploadInput } from '../../../shared/utils/imageUpload';
 
-    const ChangeAvatarImageDialog = defineAsyncComponent(() => import('./ChangeAvatarImageDialog.vue'));
+    import ImageCropDialog from '../ImageCropDialog.vue';
+
     const SetAvatarStylesDialog = defineAsyncComponent(() => import('./SetAvatarStylesDialog.vue'));
     const SetAvatarTagsDialog = defineAsyncComponent(() => import('./SetAvatarTagsDialog.vue'));
 
@@ -628,8 +644,9 @@
         { value: 'JSON', label: t('dialog.avatar.json.header') }
     ]);
 
-    const changeAvatarImageDialogVisible = ref(false);
-    const previousImageUrl = ref('');
+    const cropDialogOpen = ref(false);
+    const cropDialogFile = ref(null);
+    const changeAvatarImageLoading = ref(false);
 
     const treeData = ref({});
     const memo = ref('');
@@ -971,9 +988,63 @@
     }
 
     function showChangeAvatarImageDialog() {
-        const { imageUrl } = avatarDialog.value.ref;
-        previousImageUrl.value = imageUrl;
-        changeAvatarImageDialogVisible.value = true;
+        document.getElementById('AvatarImageUploadButton').click();
+    }
+
+    function onFileChangeAvatarImage(e) {
+        const { file, clearInput } = handleImageUploadInput(e, {
+            inputSelector: '#AvatarImageUploadButton',
+            tooLargeMessage: () => t('message.file.too_large'),
+            invalidTypeMessage: () => t('message.file.not_image')
+        });
+        if (!file) {
+            return;
+        }
+        if (!avatarDialog.value.visible || avatarDialog.value.loading) {
+            clearInput();
+            return;
+        }
+        clearInput();
+        cropDialogFile.value = file;
+        cropDialogOpen.value = true;
+    }
+
+    async function onCropConfirmAvatar(blob) {
+        changeAvatarImageLoading.value = true;
+        try {
+            await withUploadTimeout(
+                (async () => {
+                    const base64Body = await readFileAsBase64(blob);
+                    const base64File = await resizeImageToFitLimits(base64Body);
+                    if (LINUX) {
+                        const args = await avatarRequest.uploadAvatarImage(base64File);
+                        const fileUrl = args.json.versions[args.json.versions.length - 1].file.url;
+                        await avatarRequest.saveAvatar({
+                            id: avatarDialog.value.id,
+                            imageUrl: fileUrl
+                        });
+                    } else {
+                        await uploadImageLegacy('avatar', {
+                            entityId: avatarDialog.value.id,
+                            imageUrl: avatarDialog.value.ref.imageUrl,
+                            base64File,
+                            blob
+                        });
+                    }
+                })()
+            );
+            toast.success(t('message.upload.success'));
+            // force refresh cover image
+            const avatarId = avatarDialog.value.id;
+            avatarDialog.value.id = '';
+            showAvatarDialog(avatarId);
+        } catch (error) {
+            console.error('avatar image upload process failed:', error);
+            toast.error(t('message.upload.error'));
+        } finally {
+            changeAvatarImageLoading.value = false;
+            cropDialogOpen.value = false;
+        }
     }
 
     function promptChangeAvatarDescription(avatar) {
