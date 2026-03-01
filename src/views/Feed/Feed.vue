@@ -35,6 +35,9 @@
                         @update:model-value="handleFeedFilterChange"
                         class="w-full justify-start"
                         style="flex: 1">
+                        <ToggleGroupItem value="All">
+                            {{ t('view.search.avatar.all') }}
+                        </ToggleGroupItem>
                         <ToggleGroupItem v-for="type in feedFilterTypes" :key="type" :value="type">
                             {{ t('view.feed.filters.' + type) }}
                         </ToggleGroupItem>
@@ -48,12 +51,15 @@
                         @change="feedTableLookup" />
                     <Popover v-model:open="popoverOpen">
                         <PopoverTrigger as-child>
-                            <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                class="ml-2 text-muted-foreground"
-                                :class="{ 'text-accent-foreground': hasDateFilter }">
-                                <Funnel />
+                            <Button variant="outline" size="sm" class="ml-2 h-8 gap-1.5">
+                                <ListFilter class="size-4" />
+                                {{ t('view.my_avatars.filter') }}
+                                <Badge
+                                    v-if="activeFilterCount"
+                                    variant="secondary"
+                                    class="ml-0.5 h-4.5 min-w-4.5 rounded-full px-1 text-xs">
+                                    {{ activeFilterCount }}
+                                </Badge>
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent class="w-auto" side="bottom" align="end">
@@ -80,7 +86,7 @@
 
 <script setup>
     import { computed, ref, watch } from 'vue';
-    import { Funnel, Star } from 'lucide-vue-next';
+    import { ListFilter, Star } from 'lucide-vue-next';
     import { getLocalTimeZone, today } from '@internationalized/date';
     import { storeToRefs } from 'pinia';
     import { useI18n } from 'vue-i18n';
@@ -90,6 +96,7 @@
     import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
     import { useAppearanceSettingsStore, useFeedStore, useVrcxStore } from '../../stores';
     import { ToggleGroup, ToggleGroupItem } from '../../components/ui/toggle-group';
+    import { Badge } from '../../components/ui/badge';
     import { Button } from '../../components/ui/button';
     import { DataTableLayout } from '../../components/ui/data-table';
     import { InputGroupField } from '../../components/ui/input-group';
@@ -111,6 +118,7 @@
     const todayDate = today(getLocalTimeZone());
     const dateRange = ref(undefined);
     const hasDateFilter = computed(() => !!(feedTable.value.dateFrom || feedTable.value.dateTo));
+    const activeFilterCount = computed(() => (hasDateFilter.value ? 1 : 0));
 
     function applyDateFilter() {
         if (dateRange.value?.start) {
@@ -202,26 +210,23 @@
     const activeFilterSelection = computed(() => {
         const filter = feedTable.value.filter;
         if (!Array.isArray(filter) || filter.length === 0) {
-            return [...feedFilterTypes];
+            return ['All'];
         }
         return filter;
     });
 
     function handleFeedFilterChange(value) {
         const selected = Array.isArray(value) ? value : [];
-        const wasAllSelected = !Array.isArray(feedTable.value.filter) || feedTable.value.filter.length === 0;
+        const wasAll = activeFilterSelection.value.includes('All');
+        const hasAll = selected.includes('All');
+        const types = selected.filter((v) => v !== 'All');
 
-        if (selected.length === 0) {
+        if (hasAll && !wasAll) {
             feedTable.value.filter = [];
-        } else if (wasAllSelected) {
-            const clicked = feedFilterTypes.filter((t) => !selected.includes(t));
-            if (clicked.length === 1) {
-                feedTable.value.filter = clicked;
-            } else {
-                feedTable.value.filter = selected.length === feedFilterTypes.length ? [] : selected;
-            }
+        } else if (wasAll && types.length) {
+            feedTable.value.filter = types;
         } else {
-            feedTable.value.filter = selected.length === feedFilterTypes.length ? [] : selected;
+            feedTable.value.filter = types.length === feedFilterTypes.length ? [] : types.length ? types : [];
         }
         feedTableLookup();
     }
