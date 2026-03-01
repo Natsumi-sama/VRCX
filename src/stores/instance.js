@@ -8,6 +8,7 @@ import {
     compareByDisplayName,
     compareById,
     compareByLocationAt,
+    debounce,
     displayLocation,
     getAvailablePlatforms,
     getBundleDateSize,
@@ -734,6 +735,10 @@ export const useInstanceStore = defineStore('Instance', () => {
     }
 
     function applyWorldDialogInstances() {
+        debounce(applyWorldDialogInstancesDebounced, 100)();
+    }
+
+    function applyWorldDialogInstancesDebounced() {
         let ref;
         let instance;
         const D = worldStore.worldDialog;
