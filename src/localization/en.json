@@ -4,6 +4,10 @@
     "common": {
         "no_data": "No data",
         "no_matching_records": "No matching records",
+        "feature_relocated": {
+            "title": "Deprecation Notice",
+            "description": "This feature will be removed in a future update. Please use {feature} instead."
+        },
         "actions": {
             "open": "Open",
             "confirm": "Confirm",

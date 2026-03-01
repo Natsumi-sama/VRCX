@@ -1019,6 +1019,9 @@
                         @click="getUserFavoriteWorlds(userDialog.id)">
                     </Button> -->
                 <template v-if="userDialog.userFavoriteWorlds && userDialog.userFavoriteWorlds.length > 0">
+                    <DeprecationAlert
+                        v-if="userDialog.ref.id === currentUser.id"
+                        :feature-name="t('nav_tooltip.favorite_worlds')" />
                     <TabsUnderline
                         v-model="favoriteWorldsTab"
                         :items="favoriteWorldTabs"
@@ -1073,6 +1076,9 @@
             </template>
 
             <template #Avatars>
+                <DeprecationAlert
+                    v-if="userDialog.ref.id === currentUser.id"
+                    :feature-name="t('nav_tooltip.my_avatars')" />
                 <div style="display: flex; align-items: center; justify-content: space-between">
                     <div style="display: flex; align-items: center">
                         <Button
@@ -1259,6 +1265,7 @@
     import { toast } from 'vue-sonner';
     import { useI18n } from 'vue-i18n';
 
+    import DeprecationAlert from '@/components/DeprecationAlert.vue';
     import VueJsonPretty from 'vue-json-pretty';
 
     import {
@@ -1334,14 +1341,12 @@
             { value: 'Info', label: t('dialog.user.info.header') },
             { value: 'Groups', label: t('dialog.user.groups.header') },
             { value: 'Worlds', label: t('dialog.user.worlds.header') },
+            { value: 'favorite-worlds', label: t('dialog.user.favorite_worlds.header') },
             { value: 'Avatars', label: t('dialog.user.avatars.header') },
             { value: 'JSON', label: t('dialog.user.json.header') }
         ];
-        if (userDialog.value.id !== currentUser.value.id) {
-            if (!currentUser.value.hasSharedConnectionsOptOut) {
-                tabs.splice(1, 0, { value: 'mutual', label: t('dialog.user.mutual_friends.header') });
-            }
-            tabs.splice(3, 0, { value: 'favorite-worlds', label: t('dialog.user.favorite_worlds.header') });
+        if (userDialog.value.id !== currentUser.value.id && !currentUser.value.hasSharedConnectionsOptOut) {
+            tabs.splice(1, 0, { value: 'mutual', label: t('dialog.user.mutual_friends.header') });
         }
         return tabs;
     });
