@@ -815,6 +815,7 @@
         userStatusClass
     } from '../../../shared/utils';
     import {
+        useAdvancedSettingsStore,
         useAppearanceSettingsStore,
         useFavoriteStore,
         useGalleryStore,
@@ -849,6 +850,7 @@
 
     const SetWorldTagsDialog = defineAsyncComponent(() => import('./SetWorldTagsDialog.vue'));
     const WorldAllowedDomainsDialog = defineAsyncComponent(() => import('./WorldAllowedDomainsDialog.vue'));
+    const NewInstanceDialog = defineAsyncComponent(() => import('../NewInstanceDialog.vue'));
 
     const { isAgeGatedInstancesVisible, isDarkMode } = storeToRefs(useAppearanceSettingsStore());
     const { showUserDialog } = useUserStore();
@@ -863,6 +865,8 @@
     const { instanceJoinHistory } = storeToRefs(useInstanceStore());
     const { isGameRunning } = storeToRefs(useGameStore());
     const { showFullscreenImageDialog } = useGalleryStore();
+    const { translationApi } = storeToRefs(useAdvancedSettingsStore());
+
     const { t } = useI18n();
     const worldDialogTabs = computed(() => [
         { value: 'Instances', label: t('dialog.world.instances.header') },
