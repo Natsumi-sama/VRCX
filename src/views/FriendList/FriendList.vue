@@ -156,8 +156,8 @@
     const { friends, allFavoriteFriendIds } = storeToRefs(useFriendStore());
     const modalStore = useModalStore();
     const { getAllUserStats, getAllUserMutualCount, confirmDeleteFriend, handleFriendDelete } = useFriendStore();
-    const { randomUserColours } = storeToRefs(useAppearanceSettingsStore());
-    const vrcxStore = useVrcxStore();
+    const appearanceSettingsStore = useAppearanceSettingsStore();
+    const { randomUserColours } = storeToRefs(appearanceSettingsStore);
     const { showUserDialog } = useUserStore();
     const { stringComparer, friendsListSearch } = storeToRefs(useSearchStore());
 
@@ -170,8 +170,8 @@
     const friendsListSearchFilterVIP = ref(false);
     const selectedFriends = ref(new Set());
     const friendsListDisplayData = ref([]);
-    const pageSizes = [50, 100, 250, 500];
-    const pageSize = ref(100);
+    const pageSizes = computed(() => appearanceSettingsStore.tablePageSizes);
+    const pageSize = computed(() => appearanceSettingsStore.tablePageSize);
     const defaultSorting = [{ id: 'friendNumber', desc: true }];
 
     // const initialColumnPinning = {
@@ -221,7 +221,7 @@
     });
 
     const handlePageSizeChange = (size) => {
-        pageSize.value = size;
+        appearanceSettingsStore.setTablePageSize(size);
     };
 
     const handleRowClick = (row) => {
