@@ -59,21 +59,20 @@
         "custom_nav": {
             "header": "Customize Navigation",
             "dialog_title": "Customize Navigation Menu",
-            "add_folder": "Add Folder",
+            "new_folder": "New Folder",
             "folder_name_placeholder": "Folder name",
             "folder_icon_placeholder": "Icon class (e.g. ri-menu-fold-line)",
             "edit_folder": "Edit Folder",
-            "folder_available": "Available items",
-            "folder_selected": "Folder items",
-            "folder_selected_empty": "No items selected",
             "delete_folder": "Delete Folder",
-            "remove_from_folder": "Remove from folder",
-            "folder_empty": "No items in this folder",
-            "invalid_folder": "Folder must have a name and contain at least two items.",
+            "folder_empty": "This folder is empty",
+            "folder_drop_here": "Drag items here",
+            "hide": "Hide",
+            "show": "Show",
+            "hidden_items": "Hidden",
+            "confirm": "Confirm",
+            "cancel": "Cancel",
             "restore_default": "Restore Default",
-            "restore_default_confirm": "Restore navigation to its default order?",
-            "save": "Save",
-            "cancel": "Cancel"
+            "restore_default_confirm": "Restore navigation to its default order?"
         }
     },
     "side_panel": {
