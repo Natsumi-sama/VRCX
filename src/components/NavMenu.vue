@@ -231,8 +231,12 @@
                                                     :aria-label="themeColorDisplayName(theme)"
                                                     :title="themeColorDisplayName(theme)"
                                                     @click="handleThemeColorSelect(theme)"
-                                                    class="h-3.5 w-3.5 shrink-0 rounded-sm"
-                                                    :class="currentThemeColor === theme.key ? 'ring-1 --ring' : ''"
+                                                    class="h-3.5 w-3.5 shrink-0 rounded-sm transition-transform hover:scale-125"
+                                                    :class="
+                                                        currentThemeColor === theme.key
+                                                            ? 'ring-1 ring-ring ring-offset-1 ring-offset-background'
+                                                            : ''
+                                                    "
                                                     :style="{ backgroundColor: theme.swatch }"></button>
                                             </TooltipWrapper>
                                         </div>
@@ -381,6 +385,7 @@
             items: ['friend-log', 'friend-list', 'moderation']
         },
         { type: 'item', key: 'notification' },
+        { type: 'item', key: 'my-avatars' },
         {
             type: 'folder',
             id: 'default-folder-charts',

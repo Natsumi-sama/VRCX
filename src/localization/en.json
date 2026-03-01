@@ -28,6 +28,7 @@
         "favorite_friends": "Favorite Friends",
         "favorite_worlds": "Favorite Worlds",
         "favorite_avatars": "Favorite Avatars",
+        "my_avatars": "My Avatars",
         "social": "Social",
         "friend_log": "Friend Log",
         "moderation": "Moderation",
@@ -176,6 +177,10 @@
                 "status_tooltip": "VRCX Companion Status"
             }
         },
+        "my_avatars": {
+            "filter": "Filter",
+            "clear_filters": "Clear All"
+        },
         "search": {
             "search_placeholder": "Search",
             "clear_results_tooltip": "Clear Search Results",
@@ -195,6 +200,7 @@
                 "refresh_tooltip": "Refresh own avatars",
                 "result_count": "Results {count}",
                 "all": "All",
+                "all_tags": "All Tags",
                 "public": "Public",
                 "private": "Private",
                 "local": "Local",
@@ -1294,7 +1300,10 @@
                 "delete": "Delete",
                 "delete_impostor": "Delete Impostor",
                 "regenerate_impostor": "Regenerate Impostor",
-                "create_impostor": "Create Impostor"
+                "create_impostor": "Create Impostor",
+                "manage_tags": "Manage Tags",
+                "manage_tags_placeholder": "Add a tag...",
+                "manage_tags_hint": "Click a tag to change its color"
             },
             "info": {
                 "header": "Info",
@@ -1306,7 +1315,11 @@
                 "last_updated": "Last Updated",
                 "version": "Version",
                 "platform": "Platform",
+                "pc_performance": "PC Performance",
+                "android_performance": "Android Performance",
+                "ios_performance": "iOS Performance",
                 "time_spent": "Time Spent",
+                "tags": "Tags",
                 "memo": "Memo",
                 "memo_placeholder": "Click to add a memo",
                 "listings": "Listings",

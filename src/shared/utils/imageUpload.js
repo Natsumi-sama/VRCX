@@ -5,7 +5,7 @@ import { AppDebug } from '../../service/appConfig.js';
 import { extractFileId } from './index.js';
 import { imageRequest } from '../../api';
 
-const UPLOAD_TIMEOUT_MS = 20_000;
+const UPLOAD_TIMEOUT_MS = 30_000;
 
 export function withUploadTimeout(promise) {
     return Promise.race([
