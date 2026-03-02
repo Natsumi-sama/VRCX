@@ -596,7 +596,6 @@
                     "sort_instance_users_by": "インスタンス人数を並び替え:",
                     "sort_instance_users_by_time": "時間順",
                     "sort_instance_users_by_alphabet": "アルファベット順",
-                    "table_max_size": "最大読み込み件数",
                     "table_page_sizes": "1ページあたりの表示数",
                     "table_page_sizes_error": "1〜1000の数字を入力してください。",
                     "show_notification_icon_dot": "トレイ通知ドットを表示",
@@ -605,7 +604,8 @@
                     "table_density": "テーブルの行の高さ",
                     "table_density_standard": "標準",
                     "table_density_comfortable": "やや低め",
-                    "table_density_compact": "低め"
+                    "table_density_compact": "低め",
+                    "table_entries_settings": "最大読み込み件数"
                 },
                 "timedate": {
                     "header": "時刻と日付",
@@ -2096,17 +2096,6 @@
                 "success": "ワールドのYouTubeプレビュー動画を変更しました。"
             }
         },
-        "change_table_size": {
-            "header": "テーブルの最大数",
-            "description": "データベースからUIページに読み込まれるエントリの量を制限します。テーブル数が多いとRAM使用量とパフォーマンスに影響を及ぼす可能性があります。",
-            "table_max_size": "読み込むエントリの最大数",
-            "table_max_size_error": "{min}〜{max}の数字を入力してください。",
-            "search_limit": "検索の上限",
-            "search_limit_error": "{min}〜{max}の数字を入力してください。",
-            "search_limit_warning": "値が大きすぎるとVRCXが重くなる可能性があります。",
-            "cancel": "キャンセル",
-            "save": "保存"
-        },
         "photon_lobby_timeout": {
             "header": "ユーザータイムアウトのしきい値",
             "description": "タイムアウトまでの秒数を入力してください。 (デフォルト: 3)",
@@ -2153,6 +2142,19 @@
             "cancel": "キャンセル",
             "redeem": "引き換える",
             "success": "コードを引き換えました。"
+        },
+        "table_entries_settings": {
+            "header": "テーブルの最大数",
+            "description": "データベースからUIページに読み込まれるエントリの量を制限します。テーブル数が多いとRAM使用量とパフォーマンスに影響を及ぼす可能性があります。",
+            "table_max_entries": "読み込むエントリの最大数",
+            "table_max_entries_error": "{min}〜{max}の数字を入力してください。",
+            "table_max_entries_hint": "{min}〜{max}の数字を入力してください。",
+            "search_limit_returns": "検索の上限",
+            "search_limit_returns_error": "{min}〜{max}の数字を入力してください。",
+            "search_limit_returns_hint": "{min}〜{max}の数字を入力してください。",
+            "search_limit_returns_warning": "値が大きすぎるとVRCXが重くなる可能性があります。",
+            "cancel": "キャンセル",
+            "save": "保存"
         }
     },
     "message": {

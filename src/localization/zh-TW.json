@@ -591,7 +591,6 @@
                     "sort_instance_users_by": "房間用戶排序依據",
                     "sort_instance_users_by_time": "時間",
                     "sort_instance_users_by_alphabet": "字母順序",
-                    "table_max_size": "表格最大尺寸",
                     "table_page_sizes": "表格每頁筆數",
                     "table_page_sizes_error": "每頁筆數必須是 1 到 1000 之間的數字",
                     "show_notification_icon_dot": "顯示系統匣通知紅點",
@@ -600,7 +599,8 @@
                     "table_density": "表格密度",
                     "table_density_standard": "標準",
                     "table_density_comfortable": "舒適",
-                    "table_density_compact": "緊湊"
+                    "table_density_compact": "緊湊",
+                    "table_entries_settings": "表格最大尺寸"
                 },
                 "timedate": {
                     "header": "時間 / 日期",
@@ -2093,17 +2093,6 @@
                 "success": "世界 YouTube 預覽已變更"
             }
         },
-        "change_table_size": {
-            "header": "最大表格大小",
-            "description": "限制從資料庫讀取紀錄到介面的數量，較大的資料表大小可能會影響記憶體用量和效能",
-            "table_max_size": "表格大小",
-            "table_max_size_error": "請輸入介於 {min} 到 {max} 之間的數字",
-            "search_limit": "搜尋上限",
-            "search_limit_error": "請輸入介於 {min} 到 {max} 之間的數字",
-            "search_limit_warning": "數值過大可能會導致應用程式卡住",
-            "cancel": "取消",
-            "save": "儲存"
-        },
         "photon_lobby_timeout": {
             "header": "用戶超時閾值",
             "description": "輸入秒數（預設：3）",
@@ -2150,6 +2139,19 @@
             "cancel": "取消",
             "redeem": "兌換",
             "success": "代碼兌換成功"
+        },
+        "table_entries_settings": {
+            "header": "最大表格大小",
+            "description": "限制從資料庫讀取紀錄到介面的數量，較大的資料表大小可能會影響記憶體用量和效能",
+            "table_max_entries": "表格大小",
+            "table_max_entries_error": "請輸入介於 {min} 到 {max} 之間的數字",
+            "table_max_entries_hint": "請輸入介於 {min} 到 {max} 之間的數字",
+            "search_limit_returns": "搜尋上限",
+            "search_limit_returns_error": "請輸入介於 {min} 到 {max} 之間的數字",
+            "search_limit_returns_hint": "請輸入介於 {min} 到 {max} 之間的數字",
+            "search_limit_returns_warning": "數值過大可能會導致應用程式卡住",
+            "cancel": "取消",
+            "save": "儲存"
         }
     },
     "message": {

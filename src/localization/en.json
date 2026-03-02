@@ -652,7 +652,6 @@
                     "sort_instance_users_by": "Sort Instance Users by",
                     "sort_instance_users_by_time": "Time",
                     "sort_instance_users_by_alphabet": "Alphabetical",
-                    "table_max_size": "Table Max Size",
                     "table_page_sizes": "Table Page Sizes",
                     "table_page_sizes_error": "Page size must be a number between 1 and 1000",
                     "show_notification_icon_dot": "Show Tray Notification Dot",
@@ -661,7 +660,8 @@
                     "table_density": "Table Density",
                     "table_density_standard": "Standard",
                     "table_density_comfortable": "Comfortable",
-                    "table_density_compact": "Compact"
+                    "table_density_compact": "Compact",
+                    "table_entries_settings": "Table Entries Settings"
                 },
                 "display": {
                     "header": "Display"
@@ -2182,17 +2182,6 @@
                 "success": "World YouTube preview changed"
             }
         },
-        "change_table_size": {
-            "header": "Max Table Size",
-            "description": "Limit amount of entries loaded from database to UI pages, larger table sizes will impact RAM usage and performance",
-            "table_max_size": "Table Max Size",
-            "table_max_size_error": "Enter a number between {min} and {max}.",
-            "search_limit": "Search limit",
-            "search_limit_error": "Enter a number between {min} and {max}.",
-            "search_limit_warning": "Too large values can freeze the app.",
-            "cancel": "Cancel",
-            "save": "Save"
-        },
         "photon_lobby_timeout": {
             "header": "User Timeout Threshold",
             "description": "Enter amount of seconds (default: 3)",
@@ -2244,6 +2233,19 @@
             "cancel": "Cancel",
             "redeem": "Redeem",
             "success": "Code redeemed successfully"
+        },
+        "table_entries_settings": {
+            "header": "Table Entries Settings",
+            "description": "Limit the number of entries the VRCX logs from the database to the UI. A large number may impact RAM usage and performance",
+            "table_max_entries": "Table Max Entries",
+            "table_max_entries_error": "Enter a number between {min} and {max}.",
+            "table_max_entries_hint": "Valid range: {min} – {max}.",
+            "search_limit_returns": "Search Limit Returns",
+            "search_limit_returns_error": "Enter a number between {min} and {max}.",
+            "search_limit_returns_hint": "Valid range: {min} – {max}.",
+            "search_limit_returns_warning": "Too large values can freeze the app.",
+            "cancel": "Cancel",
+            "save": "Save"
         }
     },
     "message": {

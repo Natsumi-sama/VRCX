@@ -902,7 +902,7 @@ export const useAppearanceSettingsStore = defineStore(
                 vrcxStore.maxTableSize ?? 500
             );
             tableLimitsDialog.value.searchLimit = Number(
-                vrcxStore.searchLimit ?? 5000
+                vrcxStore.searchLimit ?? 50000
             );
             tableLimitsDialog.value.visible = true;
         }
@@ -931,9 +931,9 @@ export const useAppearanceSettingsStore = defineStore(
             }
 
             vrcxStore.maxTableSize = nextMaxTableSize;
-            await configRepository.setString(
-                'VRCX_maxTableSize',
-                vrcxStore.maxTableSize.toString()
+            await configRepository.setInt(
+                'VRCX_maxTableSize_v2',
+                vrcxStore.maxTableSize
             );
             database.setMaxTableSize(vrcxStore.maxTableSize);
 

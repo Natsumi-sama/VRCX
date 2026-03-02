@@ -197,7 +197,7 @@
 
             <div class="options-container-item">
                 <Button size="sm" variant="outline" @click="showTableLimitsDialog">{{
-                    t('view.settings.appearance.appearance.table_max_size')
+                    t('view.settings.appearance.appearance.table_entries_settings')
                 }}</Button>
             </div>
         </div>
