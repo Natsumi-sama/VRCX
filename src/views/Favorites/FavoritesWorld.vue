@@ -123,7 +123,7 @@
                                             >
                                         </div>
                                         <div class="group-item__bottom">
-                                            <Badge :variant="getBadgeVariant(group.visibility)">
+                                            <Badge variant="outline">
                                                 {{ t(`view.favorite.visibility.${group.visibility}`) }}
                                             </Badge>
                                             <DropdownMenu
@@ -578,7 +578,11 @@
             }
         }
     });
-
+    const worldGroupVisibilityColors = {
+        public: 'text-green-500 border-green-500',
+        friends: 'text-cyan-500 border-cyan-500',
+        private: 'text-red-500 border-red-500'
+    };
     const worldGroupVisibilityOptions = ref(['public', 'friends', 'private']);
     const worldSplitterSize = ref(260);
     const worldSplitterFallbackWidth = typeof window !== 'undefined' && window.innerWidth ? window.innerWidth : 1200;
