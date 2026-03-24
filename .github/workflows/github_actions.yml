@@ -89,12 +89,7 @@ jobs:
                   echo "${{ needs.set_version.outputs.version }}" > Version
                   echo "!define PRODUCT_VERSION_FROM_FILE \"${{ needs.set_version.outputs.date }}.0\"" > Installer/version_define.nsh
                   cat Version
-            - uses: actions/cache@v4
-              with:
-                  path: ~/.nuget/packages
-                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/Dotnet/VRCX-Cef.csproj') }}
-                  restore-keys: |
-                      ${{ runner.os }}-nuget-
+
             - name: Build Cef .NET Application
               run: dotnet build Dotnet/VRCX-Cef.csproj -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:PlatformTarget=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64 --self-contained
             - name: Check if we want to sign
@@ -312,13 +307,7 @@ jobs:
 
     create_setup:
         runs-on: ubuntu-latest
-        needs:
-            [
-                set_version,
-                build_windows,
-                build_linux,
-                build_macos
-            ]
+        needs: [set_version, build_windows, build_linux, build_macos]
         steps:
             - name: Download Cef-Setup artifacts
               uses: actions/download-artifact@v6
