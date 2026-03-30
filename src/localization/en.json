@@ -3125,6 +3125,7 @@
         "clock": "Clock",
         "clocks_label": "Clocks",
         "clocks_none": "None",
-        "timezone": "Timezone"
+        "timezone": "Timezone",
+        "now_playing": "Now Playing"
     }
 }
