@@ -4,10 +4,24 @@
     "i18n-ally.sourceLanguage": "en",
     "i18n-ally.indent": 4,
     "oxc.fmt.configPath": ".oxfmtrc.json",
-    "editor.defaultFormatter": "oxc.oxc-vscode",
     "editor.formatOnSave": true,
     "omnisharp.enableRoslynAnalyzers": true,
     "omnisharp.useModernNet": false,
+    "[javascript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[javascriptreact]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[vue]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
     "[csharp]": {
         "editor.defaultFormatter": "ms-dotnettools.csharp"
     },
