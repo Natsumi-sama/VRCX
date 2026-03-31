@@ -6,10 +6,6 @@
             </span>
             <div v-if="dailySummary.length > 0" class="flex items-center gap-4 text-sm text-muted-foreground">
                 <span>
-                    {{ t('view.charts.playtime_trend.total') }}:
-                    <strong class="text-foreground">{{ formatHours(totalMs) }}</strong>
-                </span>
-                <span>
                     {{ t('view.charts.playtime_trend.daily_avg') }}:
                     <strong class="text-foreground">{{ formatHours(avgDailyMs) }}</strong>
                 </span>

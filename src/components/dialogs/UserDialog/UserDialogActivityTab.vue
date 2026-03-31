@@ -298,7 +298,7 @@
     const topWorldsLoading = ref(false);
     const topWorldsLoadingVisible = ref(false);
     const topWorlds = ref([]);
-    const topWorldsSortBy = ref('time');
+    const topWorldsSortBy = ref('count');
     const excludeHomeWorldEnabled = ref(false);
     const excludeHoursEnabled = ref(false);
     const excludeStartHour = ref('1');
@@ -359,14 +359,14 @@
         const [period, sortBy, excludeHomeWorld, overlapExcludeEnabled, overlapExcludeStart, overlapExcludeEnd] =
             await Promise.all([
                 configRepository.getString(periodKey, '30'),
-                configRepository.getString(ACTIVITY_SELF_TOP_WORLDS_SORT_KEY, 'time'),
+                configRepository.getString(ACTIVITY_SELF_TOP_WORLDS_SORT_KEY, 'count'),
                 configRepository.getBool(ACTIVITY_SELF_EXCLUDE_HOME_WORLD_KEY, false),
                 configRepository.getBool('VRCX_overlapExcludeEnabled', false),
                 configRepository.getString('VRCX_overlapExcludeStart', '1'),
                 configRepository.getString('VRCX_overlapExcludeEnd', '6')
             ]);
-        selectedPeriod.value = ['7', '30', '90'].includes(period) ? period : '30';
-        topWorldsSortBy.value = ['time', 'count'].includes(sortBy) ? sortBy : 'time';
+        selectedPeriod.value = ['0', '7', '30', '90', '180', '365'].includes(period) ? period : '30';
+        topWorldsSortBy.value = ['time', 'count'].includes(sortBy) ? sortBy : 'count';
         excludeHomeWorldEnabled.value = excludeHomeWorld;
         excludeHoursEnabled.value = overlapExcludeEnabled;
         excludeStartHour.value = String(overlapExcludeStart);
