@@ -36,9 +36,7 @@
 
     const hasData = computed(() => dailySummary.value.length > 0);
 
-    const totalMs = computed(() =>
-        dailySummary.value.reduce((sum, d) => sum + d.totalMs, 0)
-    );
+    const totalMs = computed(() => dailySummary.value.reduce((sum, d) => sum + d.totalMs, 0));
 
     const avgDailyMs = computed(() => {
         if (dailySummary.value.length === 0) return 0;
@@ -99,9 +97,7 @@
 
         const now = Date.now();
         const rangeDays = props.rangeDays;
-        const rangeStart = rangeDays > 0
-            ? now - rangeDays * 86400000
-            : sessions[0].start;
+        const rangeStart = rangeDays > 0 ? now - rangeDays * 86400000 : sessions[0].start;
 
         const dayMap = new Map();
         const ONE_DAY_MS = 86400000;
@@ -184,6 +180,8 @@
             },
             yAxis: {
                 type: 'value',
+                max: 24,
+                interval: 6,
                 axisLabel: {
                     formatter: (v) => `${v}h`,
                     fontSize: 10
@@ -192,22 +190,23 @@
                     lineStyle: { type: 'dashed' }
                 }
             },
-            dataZoom: dates.length > 60
-                ? [
-                    {
-                        type: 'slider',
-                        start: Math.max(0, 100 - (60 / dates.length) * 100),
-                        end: 100,
-                        height: 20,
-                        bottom: 5
-                    },
-                    {
-                        type: 'inside',
-                        start: Math.max(0, 100 - (60 / dates.length) * 100),
-                        end: 100
-                    }
-                ]
-                : undefined,
+            dataZoom:
+                dates.length > 60
+                    ? [
+                          {
+                              type: 'slider',
+                              start: Math.max(0, 100 - (60 / dates.length) * 100),
+                              end: 100,
+                              height: 20,
+                              bottom: 5
+                          },
+                          {
+                              type: 'inside',
+                              start: Math.max(0, 100 - (60 / dates.length) * 100),
+                              end: 100
+                          }
+                      ]
+                    : undefined,
             series: [
                 {
                     name: 'Playtime',
