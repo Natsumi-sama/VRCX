@@ -582,6 +582,14 @@
                     "last_fetched": "Last fetched"
                 }
             },
+            "playtime_trend": {
+                "header": "Daily Playtime",
+                "online_hours": "Hours",
+                "daily_avg": "Daily Average",
+                "total": "Total",
+                "waiting": "Building playtime data, please come back later.",
+                "no_data": "No playtime data available"
+            },
             "hot_worlds": {
                 "tab_label": "Hot Worlds",
                 "header": "Hot Worlds",
@@ -1470,6 +1478,10 @@
                 "most_active_time": "Peak hours:",
                 "period": "Period:",
                 "period_90": "Last 90 Days",
+                "period_180": "Last 6 Months",
+                "period_365": "Last 1 Year",
+                "period_all": "All Time",
+                "building_cache": "Computing all activity data for extended ranges...",
                 "period_30": "Last 30 Days",
                 "period_7": "Last 7 Days",
                 "minutes_online": "min online",
