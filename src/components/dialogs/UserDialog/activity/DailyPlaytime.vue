@@ -88,10 +88,10 @@
     }
 
     function buildSummary() {
+        disposeChart();
         const sessions = props.sessions;
         if (!sessions || sessions.length === 0) {
             dailySummary.value = [];
-            disposeChart();
             return;
         }
 
@@ -195,14 +195,14 @@
                     ? [
                           {
                               type: 'slider',
-                              start: Math.max(0, 100 - (60 / dates.length) * 100),
+                              start: 0,
                               end: 100,
                               height: 20,
                               bottom: 5
                           },
                           {
                               type: 'inside',
-                              start: Math.max(0, 100 - (60 / dates.length) * 100),
+                              start: 0,
                               end: 100
                           }
                       ]
