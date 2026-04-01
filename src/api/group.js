@@ -819,6 +819,43 @@ const groupReq = {
             };
             return args;
         });
+    },
+
+    getRoleTemplates() {
+        return request('groups/roleTemplates', {
+            method: 'GET'
+        }).then((json) => {
+            const args = {
+                json
+            };
+            return args;
+        });
+    },
+
+    /**
+     * @param {{
+     * name: string,
+     * shortCode: string,
+     * description: string,
+     * joinState: 'open' | 'request' | 'invite' | 'closed',
+     * privacy: 'public' | 'private',
+     * roleTemplate: 'default' | 'managedFree' | 'managedInvite' | 'managedRequest',
+     * bannerId: string,
+     * iconId: string
+     * }} params
+     * @returns { Promise<{json: any, params}> }
+     */
+    createGroup(params) {
+        return request('groups', {
+            method: 'POST',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
     }
 
     // getRequestedGroups() {
