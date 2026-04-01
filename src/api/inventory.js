@@ -136,6 +136,47 @@ const inventoryReq = {
             };
             return args;
         });
+    },
+
+    /**
+     * @param {{
+     * equipSlot: 'drone' | 'warp' | 'portal' | 'loadingscreen'
+     * holderId: string
+     * }} params
+     * @returns {Promise<{json: any, params}>}
+     * Note: Do not redeem
+     */
+    getEquipSlot(params) {
+        return request('inventory', {
+            method: 'GET',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
+    /**
+     * @param {{
+     * equipSlot: 'drone' | 'warp' | 'portal' | 'loadingscreen'
+     * inventoryId: string
+     * }} params
+     * @returns {Promise<{json: any, params}>}
+     */
+    equipItem(params) {
+        return request(`inventory/${params.inventoryId}/equip`, {
+            method: 'PUT',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
     }
 };
 
