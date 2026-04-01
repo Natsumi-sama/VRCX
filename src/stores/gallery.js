@@ -447,6 +447,10 @@ export const useGalleryStore = defineStore('Gallery', () => {
                     break;
                 }
             }
+            const globalInventory = await inventoryRequest.getGlobalInventory();
+            for (const item of globalInventory.json) {
+                inventoryTable.value.push(item);
+            }
         } catch (error) {
             console.error('Error fetching inventory items:', error);
         } finally {

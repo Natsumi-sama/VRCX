@@ -121,6 +121,21 @@ const inventoryReq = {
             refetchActiveInventoryQueries();
             return args;
         });
+    },
+
+    /**
+     * @returns {Promise<{json: any, params}>}
+     */
+    getGlobalInventory() {
+        return request('inventory/global', {
+            method: 'GET'
+        }).then((json) => {
+            const args = {
+                json,
+                params: {}
+            };
+            return args;
+        });
     }
 };
 
