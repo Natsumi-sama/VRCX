@@ -790,6 +790,35 @@ const groupReq = {
             };
             return args;
         });
+    },
+
+    /**
+     * @param {{
+     * id: string,
+     * name: string,
+     * shortCode: string,
+     * description: string,
+     * joinState: 'open' | 'request' | 'invite' | 'closed',
+     * language: string,
+     * rules: string,
+     * links: Array<string>,
+     * bannerId: string,
+     * iconId: string,
+     * allowGroupJoinPrompt: boolean
+     * }} params
+     * @returns { Promise<{json: any, params}> }
+     */
+    editGroup(params) {
+        return request(`groups/${params.id}`, {
+            method: 'PUT',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
     }
 
     // getRequestedGroups() {
