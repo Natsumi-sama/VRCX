@@ -930,6 +930,11 @@ function disposeOverlay() {
         return;
     }
     if (overlayWindow && !overlayWindow.isDestroyed()) {
+        const { webContents } = overlayWindow;
+        if (webContents && !webContents.isDestroyed()) {
+            webContents.removeAllListeners('paint');
+            webContents.stopPainting();
+        }
         overlayWindow.close();
     }
     overlayWindow = undefined;
