@@ -107,6 +107,7 @@ const OVERLAY_SHARED_WIDTH = Math.max(
 );
 const OVERLAY_FRAME_SIZE = OVERLAY_SHARED_WIDTH * OVERLAY_SHARED_HEIGHT * 4;
 const OVERLAY_SHM_PATH = '/dev/shm/vrcx_overlay';
+const overlayFrameBuffer = Buffer.alloc(OVERLAY_FRAME_SIZE + 1);
 
 function createOverlayWindowShm() {
     fs.writeFileSync(OVERLAY_SHM_PATH, Buffer.alloc(OVERLAY_FRAME_SIZE + 1));
@@ -467,17 +468,20 @@ function createOverlayWindowOffscreen() {
 }
 
 function writeOverlayFrame(imageBuffer) {
+    let fd;
     try {
-        const fd = fs.openSync(OVERLAY_SHM_PATH, 'r+');
-        const buffer = Buffer.alloc(OVERLAY_FRAME_SIZE + 1);
-        buffer[0] = 0; // not ready
-        imageBuffer.copy(buffer, 1, 0, OVERLAY_FRAME_SIZE);
-        buffer[0] = 1; // ready
-        fs.writeSync(fd, buffer);
-        fs.closeSync(fd);
+        fd = fs.openSync(OVERLAY_SHM_PATH, 'r+');
+        overlayFrameBuffer[0] = 0; // not ready
+        imageBuffer.copy(overlayFrameBuffer, 1, 0, OVERLAY_FRAME_SIZE);
+        overlayFrameBuffer[0] = 1; // ready
+        fs.writeSync(fd, overlayFrameBuffer);
         //console.log('Wrote frame to shared memory');
     } catch (err) {
         console.error('Error writing frame to shared memory:', err);
+    } finally {
+        if (typeof fd === 'number') {
+            fs.closeSync(fd);
+        }
     }
 }
 
