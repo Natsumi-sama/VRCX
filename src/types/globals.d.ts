@@ -90,6 +90,7 @@ declare global {
         debugGameLog: boolean;
         debugWebRequests: boolean;
         debugFriendState: boolean;
+        debugRecompute: boolean;
         debugIPC: boolean;
         debugVrcPlus: boolean;
         errorNoty: any;
