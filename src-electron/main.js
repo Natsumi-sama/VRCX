@@ -108,6 +108,7 @@ const OVERLAY_SHARED_WIDTH = Math.max(
 const OVERLAY_FRAME_SIZE = OVERLAY_SHARED_WIDTH * OVERLAY_SHARED_HEIGHT * 4;
 const OVERLAY_SHM_PATH = '/dev/shm/vrcx_overlay';
 const overlayFrameBuffer = Buffer.alloc(OVERLAY_FRAME_SIZE + 1);
+let activeNotification = null;
 
 function createOverlayWindowShm() {
     fs.writeFileSync(OVERLAY_SHM_PATH, Buffer.alloc(OVERLAY_FRAME_SIZE + 1));
@@ -200,12 +201,23 @@ ipcMain.handle('dialog:openDirectory', async () => {
 });
 
 ipcMain.handle('notification:showNotification', (event, title, body, icon) => {
-    const notification = {
+    if (activeNotification) {
+        activeNotification.close();
+    }
+
+    const notification = new Notification({
         title,
         body,
         icon
-    };
-    new Notification(notification).show();
+    });
+    notification.on('close', () => {
+        if (activeNotification === notification) {
+            notification.removeAllListeners();
+            activeNotification = null;
+        }
+    });
+    activeNotification = notification;
+    notification.show();
 });
 
 ipcMain.handle('app:restart', () => {
