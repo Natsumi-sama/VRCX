@@ -1,6 +1,10 @@
 {
     "i18n-ally.localesPaths": ["src/localization"],
+    "i18n-ally.enabledFrameworks": ["vue"],
     "i18n-ally.keystyle": "nested",
+    "i18n-ally.dirStructure": "file",
+    "i18n-ally.namespace": false,
+    "i18n-ally.pathMatcher": "{locale}.json",
     "i18n-ally.sourceLanguage": "en",
     "i18n-ally.indent": 4,
     "oxc.fmt.configPath": ".oxfmtrc.json",
@@ -28,5 +32,9 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
-    "eslint.validate": ["javascript", "vue", "html"]
+    "eslint.validate": [
+        "javascript",
+        "vue",
+        "html"
+    ],
 }
