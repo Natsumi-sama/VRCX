@@ -463,7 +463,6 @@ export const useGameLogStore = defineStore('GameLog', () => {
         if (sessionsViewMode.value === 'sessions') {
             appendSessionsEntry(entry);
         }
-        uiStore.notifyMenu('game-log');
     }
 
     /**
