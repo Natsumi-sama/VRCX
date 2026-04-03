@@ -424,18 +424,6 @@ export const useGameLogStore = defineStore('GameLog', () => {
         // Update ref for GameLog Widget (independent data stream)
         latestGameLogEntry.value = entry;
 
-        // If the VIP friend filter is enabled, logs from other friends will be ignored.
-        if (
-            gameLogTable.value.vip &&
-            !friendStore.localFavoriteFriends.has(entry.userId) &&
-            (entry.type === 'OnPlayerJoined' ||
-                entry.type === 'OnPlayerLeft' ||
-                entry.type === 'VideoPlay' ||
-                entry.type === 'PortalSpawn' ||
-                entry.type === 'External')
-        ) {
-            return;
-        }
         if (
             entry.type === 'LocationDestination' ||
             entry.type === 'AvatarChange' ||
@@ -446,16 +434,28 @@ export const useGameLogStore = defineStore('GameLog', () => {
         ) {
             return;
         }
-        if (
-            gameLogTable.value.filter.length > 0 &&
-            !gameLogTable.value.filter.includes(entry.type)
-        ) {
-            return;
-        }
-        if (!gameLogSearch(entry)) {
-            return;
-        }
         if (sessionsViewMode.value === 'table') {
+            // Table view applies its own VIP/filter/search gating.
+            if (
+                gameLogTable.value.vip &&
+                !friendStore.localFavoriteFriends.has(entry.userId) &&
+                (entry.type === 'OnPlayerJoined' ||
+                    entry.type === 'OnPlayerLeft' ||
+                    entry.type === 'VideoPlay' ||
+                    entry.type === 'PortalSpawn' ||
+                    entry.type === 'External')
+            ) {
+                return;
+            }
+            if (
+                gameLogTable.value.filter.length > 0 &&
+                !gameLogTable.value.filter.includes(entry.type)
+            ) {
+                return;
+            }
+            if (!gameLogSearch(entry)) {
+                return;
+            }
             insertGameLogSorted(entry);
             sweepGameLog();
         }

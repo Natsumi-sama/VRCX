@@ -130,7 +130,7 @@
                             </Badge>
                         </div>
                         <span class="flex-1 min-w-0 flex items-center gap-1 truncate">
-                            <Play />
+                            <Play class="shrink-0 text-xs" />
                             <span
                                 v-if="showLink"
                                 class="truncate cursor-pointer"
