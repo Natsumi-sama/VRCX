@@ -365,6 +365,28 @@ const groupReq = {
             return args;
         });
     },
+
+    /**
+     * @param {{
+     * membershipStatus : 'invited' | 'requested' | 'userblocked'
+     * }} params
+     * @returns { Promise<{json: any, params}> }
+     */
+    getBlockedGroups(params) {
+        return request(
+            `users/${getCurrentUserId()}/groups/${params.membershipStatus}`,
+            {
+                method: 'GET'
+            }
+        ).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
     /**
      * @param {{
      * groupId: string
@@ -792,6 +814,121 @@ const groupReq = {
         });
     },
 
+    deleteGroupEvent(params) {
+        return request(`calendar/${params.groupId}/${params.eventId}`, {
+            method: 'DELETE'
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
+    /**
+     * @param {{
+     * startsAt: string,
+     * endsAt: string,
+     * title: string,
+     * accessType: 'group' | 'public',
+     * description: string,
+     * category: string,
+     * tags: Array<string>,
+     * isDraft: boolean,
+     * imageId: string,
+     * roleIds: Array<string>,
+     * parentId: null,
+     * platforms: Array<string>,
+     * languages: Array<string>,
+     * sendCreationNotification: boolean,
+     * featured: boolean,
+     * hostEarlyJoinMinutes: number,
+     * guestEarlyJoinMinutes: number,
+     * closeInstanceAfterEndMinutes: number,
+     * usesInstanceOverflow: boolean,
+     * groupId: string
+     * }} params
+     * @returns { Promise<{json: any, params}> }
+     */
+    createGroupEvent(params) {
+        return request(`calendar/${params.groupId}/event`, {
+            method: 'POST',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
+    /**
+     * @param {{
+     * startsAt?: string,
+     * endsAt?: string,
+     * title?: string,
+     * accessType?: 'group' | 'public',
+     * description?: string,
+     * category?: string,
+     * tags?: Array<string>,
+     * isDraft?: boolean,
+     * imageId?: string,
+     * roleIds?: Array<string>,
+     * parentId?: null,
+     * platforms?: Array<string>,
+     * languages?: Array<string>,
+     * sendCreationNotification?: boolean,
+     * featured?: boolean,
+     * hostEarlyJoinMinutes?: number,
+     * guestEarlyJoinMinutes?: number,
+     * closeInstanceAfterEndMinutes?: number,
+     * usesInstanceOverflow?: boolean,
+     * groupId: string,
+     * eventId: string
+     * }} params
+     * @returns { Promise<{json: any, params}> }
+     */
+    editGroupEvent(params) {
+        return request(`calendar/${params.groupId}/${params.eventId}`, {
+            method: 'PUT',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
+    /**
+     * @param {{
+     * name: string,
+     * shortCode: string,
+     * description: string,
+     * joinState: 'open' | 'request' | 'invite' | 'closed',
+     * privacy: 'public' | 'private',
+     * roleTemplate: 'default' | 'managedFree' | 'managedInvite' | 'managedRequest',
+     * bannerId: string,
+     * iconId: string
+     * }} params
+     * @returns { Promise<{json: any, params}> }
+     */
+    createGroup(params) {
+        return request('groups', {
+            method: 'POST',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
     /**
      * @param {{
      * id: string,
@@ -827,32 +964,6 @@ const groupReq = {
         }).then((json) => {
             const args = {
                 json
-            };
-            return args;
-        });
-    },
-
-    /**
-     * @param {{
-     * name: string,
-     * shortCode: string,
-     * description: string,
-     * joinState: 'open' | 'request' | 'invite' | 'closed',
-     * privacy: 'public' | 'private',
-     * roleTemplate: 'default' | 'managedFree' | 'managedInvite' | 'managedRequest',
-     * bannerId: string,
-     * iconId: string
-     * }} params
-     * @returns { Promise<{json: any, params}> }
-     */
-    createGroup(params) {
-        return request('groups', {
-            method: 'POST',
-            params
-        }).then((json) => {
-            const args = {
-                json,
-                params
             };
             return args;
         });

@@ -427,7 +427,8 @@ export const useGalleryStore = defineStore('Gallery', () => {
         const params = {
             n: 100,
             offset: 0,
-            order: 'newest'
+            order: 'newest',
+            notFlags: 'ugc'
         };
         galleryDialogInventoryLoading.value = true;
         try {
@@ -439,9 +440,7 @@ export const useGalleryStore = defineStore('Gallery', () => {
                         item.id,
                         item
                     );
-                    if (!item.flags.includes('ugc')) {
-                        inventoryTable.value.push(item);
-                    }
+                    inventoryTable.value.push(item);
                 }
                 if (args.json.data.length === 0) {
                     break;

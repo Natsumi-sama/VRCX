@@ -17,7 +17,7 @@ function refetchActiveInventoryQueries() {
 
 const inventoryReq = {
     /**
-     * @param {{ inventoryId: string, userId: string }} params
+     * @param {{ inventoryId: string, userId: string, flags }} params
      * @returns {Promise<{json: any, params}>}
      */
     getUserInventoryItem(params) {
@@ -53,7 +53,7 @@ const inventoryReq = {
     },
 
     /**
-     * @param {{ n: number, offset: number, order: string, types?: string }} params
+     * @param {{ n: number, offset: number, order: string, types?: string, flags?: string, notFlags?: string, archived?: boolean }} params
      * @returns {Promise<{json: any, params}>}
      */
     getInventoryItems(params) {
@@ -170,6 +170,36 @@ const inventoryReq = {
         return request(`inventory/${params.inventoryId}/equip`, {
             method: 'PUT',
             params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
+    archiveItem(params) {
+        return request(`inventory/${params.inventoryId}`, {
+            method: 'PUT',
+            params: {
+                isArchived: true
+            }
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
+    unArchiveItem(params) {
+        return request(`inventory/${params.inventoryId}`, {
+            method: 'PUT',
+            params: {
+                isArchived: false
+            }
         }).then((json) => {
             const args = {
                 json,
