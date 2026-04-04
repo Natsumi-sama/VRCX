@@ -676,6 +676,60 @@ const groupReq = {
             return args;
         });
     },
+
+    /**
+     * @param {{
+     * groupId: string,
+     * name?: string,
+     * description?: string,
+     * isAddedOnJoin?: boolean,
+     * isSelfAssignable?: boolean,
+     * requiresTwoFactor?: boolean,
+     * permissions?: Array<string>,
+     * requiresPurchase?: boolean
+     * }} params
+     * @returns { Promise<{json: any, params}> }
+     */
+    createGroupRole(params) {
+        return request(`groups/${params.groupId}/roles`, {
+            method: 'POST',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
+    /**
+     * @param {{
+     * groupId: string,
+     * roleId: string,
+     * name?: string,
+     * description?: string,
+     * isAddedOnJoin?: boolean,
+     * isSelfAssignable?: boolean,
+     * requiresTwoFactor?: boolean,
+     * permissions?: Array<string>,
+     * order?: number
+     * }} params
+     * @returns { Promise<{json: any, params}> }
+     */
+    editGroupRole(params) {
+        return request(`groups/${params.groupId}/roles/${params.roleId}`, {
+            method: 'PUT',
+            params
+        }).then((json) => {
+            const args = {
+                json,
+                params
+            };
+            return args;
+        });
+    },
+
     getUsersGroupInstances() {
         return request(`users/${getCurrentUserId()}/instances/groups`, {
             method: 'GET'
