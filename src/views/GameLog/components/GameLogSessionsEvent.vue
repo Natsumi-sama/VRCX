@@ -89,7 +89,8 @@
                         {{ t('view.game_log.filters.OnPlayerJoined') }}
                     </Badge>
                 </div>
-                <span class="flex-1 min-w-0 truncate cursor-pointer" @click="lookupUser(event)">
+                <span class="flex-1 min-w-0 flex items-center gap-1 truncate cursor-pointer" @click="lookupUser(event)">
+                    <LogIn class="shrink-0 text-xs" />
                     {{ event.displayName
                     }}<span v-if="event.isFriend" class="ml-1"> {{ event.isFavorite ? '⭐' : '💚' }}</span>
                 </span>
@@ -108,7 +109,8 @@
                         {{ t('view.game_log.filters.OnPlayerLeft') }}
                     </Badge>
                 </div>
-                <span class="flex-1 min-w-0 truncate cursor-pointer" @click="lookupUser(event)">
+                <span class="flex-1 min-w-0 flex items-center gap-1 truncate cursor-pointer" @click="lookupUser(event)">
+                    <LogOut class="shrink-0 text-xs" />
                     {{ event.displayName
                     }}<span v-if="event.isFriend" class="ml-1"> {{ event.isFavorite ? '⭐' : '💚' }}</span>
                 </span>
@@ -168,7 +170,7 @@
 
 <script setup>
     import { computed, ref } from 'vue';
-    import { ChevronRight, Copy, ExternalLink, Play } from 'lucide-vue-next';
+    import { ChevronRight, Copy, ExternalLink, Play, LogIn, LogOut } from 'lucide-vue-next';
     import { useI18n } from 'vue-i18n';
 
     import { Badge } from '../../../components/ui/badge';
