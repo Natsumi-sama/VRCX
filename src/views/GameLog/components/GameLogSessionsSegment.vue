@@ -21,17 +21,22 @@
             <Badge v-if="durationText" variant="outline" class="text-[0.625rem] font-tabular-nums h-4 px-1">
                 {{ durationText }}
             </Badge>
-            <Badge
-                v-else-if="showCurrentBadge"
-                variant="outline"
-                class="text-[0.625rem] h-4 px-1 text-green-500 border-green-500/40 dark:text-green-400 dark:border-green-400/40">
+            <Badge v-else-if="showCurrentBadge" variant="outline" class="text-[0.625rem] h-4 px-1">
                 {{ t('common.current_session') }}
             </Badge>
-            <div v-if="segment.events && segment.events.length > 0" class="flex items-center gap-2 text-muted-foreground text-[0.6875rem] ml-auto shrink-0">
-                <span v-if="joinCount" class="flex items-center gap-0.5" :title="t('view.game_log.filters.OnPlayerJoined')">
+            <div
+                v-if="segment.events && segment.events.length > 0"
+                class="flex items-center gap-2 text-muted-foreground text-[0.6875rem] ml-auto shrink-0">
+                <span
+                    v-if="joinCount"
+                    class="flex items-center gap-0.5"
+                    :title="t('view.game_log.filters.OnPlayerJoined')">
                     <UserPlus class="size-3" /> {{ joinCount }}
                 </span>
-                <span v-if="leftCount" class="flex items-center gap-0.5" :title="t('view.game_log.filters.OnPlayerLeft')">
+                <span
+                    v-if="leftCount"
+                    class="flex items-center gap-0.5"
+                    :title="t('view.game_log.filters.OnPlayerLeft')">
                     <UserMinus class="size-3" /> {{ leftCount }}
                 </span>
                 <span v-if="videoCount" class="flex items-center gap-0.5" :title="t('view.game_log.filters.VideoPlay')">
@@ -85,9 +90,7 @@
         return timeToText(props.segment.duration);
     });
 
-    const showCurrentBadge = computed(
-        () => props.isLatest && gameStore.isGameRunning && !durationText.value
-    );
+    const showCurrentBadge = computed(() => props.isLatest && gameStore.isGameRunning && !durationText.value);
 
     const joinCount = computed(() => {
         if (!props.segment.events) return 0;
