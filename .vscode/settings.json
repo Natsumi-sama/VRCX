@@ -9,12 +9,18 @@
     "i18n-ally.indent": 4,
     "oxc.fmt.configPath": ".oxfmtrc.json",
     "editor.formatOnSave": true,
-    "omnisharp.enableRoslynAnalyzers": true,
+    "editor.defaultFormatter": "oxc.oxc-vscode",
     "omnisharp.useModernNet": false,
     "[javascript]": {
         "editor.defaultFormatter": "oxc.oxc-vscode"
     },
     "[javascriptreact]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "oxc.oxc-vscode"
+    },
+    "[typescriptreact]": {
         "editor.defaultFormatter": "oxc.oxc-vscode"
     },
     "[vue]": {
@@ -32,9 +38,5 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"
     },
-    "eslint.validate": [
-        "javascript",
-        "vue",
-        "html"
-    ],
+    "eslint.validate": ["javascript", "vue", "html"]
 }
