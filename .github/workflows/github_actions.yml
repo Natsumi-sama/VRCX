@@ -55,6 +55,7 @@ jobs:
               run: npm ci
             - name: Build Cef-html
               env:
+                  PLATFORM: windows
                   SENTRY_AUTH_TOKEN: ${{ secrets.SentryAuthToken }}
               run: npm run prod
             - name: Upload Cef-html artifacts
@@ -64,8 +65,9 @@ jobs:
                   path: build/html
             - name: Build Electron-html
               env:
+                  PLATFORM: linux
                   SENTRY_AUTH_TOKEN: ${{ secrets.SentryAuthToken }}
-              run: npm run prod-linux
+              run: npm run prod
             - name: Upload Electron-html artifacts
               uses: actions/upload-artifact@v7
               with:
@@ -83,7 +85,7 @@ jobs:
             - name: Setup .NET 10
               uses: actions/setup-dotnet@v5
               with:
-                  dotnet-version: '10.0.x'
+                  dotnet-version: "10.0.x"
             - name: Set version
               run: |
                   echo "${{ needs.set_version.outputs.version }}" > Version
@@ -183,7 +185,7 @@ jobs:
             - name: Setup .NET 10
               uses: actions/setup-dotnet@v5
               with:
-                  dotnet-version: '10.0.x'
+                  dotnet-version: "10.0.x"
             - name: Set version
               run: |
                   echo "${{ needs.set_version.outputs.version }}" > Version
@@ -224,7 +226,7 @@ jobs:
               uses: actions/upload-artifact@v7
               with:
                   name: Electron-AppImage-x64
-                  path: 'build/VRCX_${{ needs.set_version.outputs.version }}_x64.AppImage'
+                  path: "build/VRCX_${{ needs.set_version.outputs.version }}_x64.AppImage"
 
             - name: Cleanup
               run: |
@@ -238,7 +240,7 @@ jobs:
               uses: actions/upload-artifact@v7
               with:
                   name: Electron-AppImage-arm64
-                  path: 'build/VRCX_${{ needs.set_version.outputs.version }}_arm64.AppImage'
+                  path: "build/VRCX_${{ needs.set_version.outputs.version }}_arm64.AppImage"
 
     build_macos:
         runs-on: macos-latest
@@ -248,7 +250,7 @@ jobs:
             - name: Setup .NET 10
               uses: actions/setup-dotnet@v5
               with:
-                  dotnet-version: '10.0.x'
+                  dotnet-version: "10.0.x"
             - name: Set version
               run: |
                   echo "${{ needs.set_version.outputs.version }}" > Version
@@ -289,7 +291,7 @@ jobs:
               uses: actions/upload-artifact@v7
               with:
                   name: Electron-MacDmg-x64
-                  path: 'build/VRCX_${{ needs.set_version.outputs.version }}_x64.dmg'
+                  path: "build/VRCX_${{ needs.set_version.outputs.version }}_x64.dmg"
 
             - name: Cleanup
               run: |
@@ -303,7 +305,7 @@ jobs:
               uses: actions/upload-artifact@v7
               with:
                   name: Electron-MacDmg-arm64
-                  path: 'build/VRCX_${{ needs.set_version.outputs.version }}_arm64.dmg'
+                  path: "build/VRCX_${{ needs.set_version.outputs.version }}_arm64.dmg"
 
     create_setup:
         runs-on: ubuntu-latest
@@ -359,8 +361,8 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  tag_name: '${{ needs.set_version.outputs.version }}'
-                  release_name: 'VRCX Nightly ${{ needs.set_version.outputs.version }}'
+                  tag_name: "${{ needs.set_version.outputs.version }}"
+                  release_name: "VRCX Nightly ${{ needs.set_version.outputs.version }}"
                   draft: false
                   prerelease: false
             - name: Upload multiple assets to release
