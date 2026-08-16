@@ -53,25 +53,14 @@ jobs:
                       ${{ runner.os }}-node-
             - name: Restore dependencies
               run: npm ci
-            - name: Build Cef-html
+            - name: Build html
               env:
-                  PLATFORM: windows
                   SENTRY_AUTH_TOKEN: ${{ secrets.SentryAuthToken }}
               run: npm run prod
-            - name: Upload Cef-html artifacts
+            - name: Upload html artifacts
               uses: actions/upload-artifact@v7
               with:
-                  name: Cef-html
-                  path: build/html
-            - name: Build Electron-html
-              env:
-                  PLATFORM: linux
-                  SENTRY_AUTH_TOKEN: ${{ secrets.SentryAuthToken }}
-              run: npm run prod
-            - name: Upload Electron-html artifacts
-              uses: actions/upload-artifact@v7
-              with:
-                  name: Electron-html
+                  name: html
                   path: build/html
 
     build_windows:
@@ -133,11 +122,11 @@ jobs:
                       ${{ github.workspace }}\build\Cef\VRCX.dll
                       ${{ github.workspace }}\build\Cef\VRCX.exe
 
-            - name: Download Cef-html artifacts
+            - name: Download html artifacts
               uses: actions/download-artifact@v8
               with:
-                  name: Cef-html
-                  path: build/Cef/html
+                  name: html
+                  path: build/html
             - name: Install NSIS
               run: choco install nsis -y
             - name: Create NSIS installer
@@ -215,10 +204,10 @@ jobs:
                       ${{ runner.os }}-node-
             - name: Restore dependencies
               run: npm ci
-            - name: Download Electron-html artifacts
+            - name: Download html artifacts
               uses: actions/download-artifact@v8
               with:
-                  name: Electron-html
+                  name: html
                   path: build/html
             - name: Build x64 AppImage
               run: npm run build-electron
@@ -280,10 +269,10 @@ jobs:
                       ${{ runner.os }}-node-
             - name: Restore dependencies
               run: npm ci
-            - name: Download Electron-html artifacts
+            - name: Download html artifacts
               uses: actions/download-artifact@v8
               with:
-                  name: Electron-html
+                  name: html
                   path: build/html
             - name: Build x64 macOS .dmg
               run: npm run build-electron
@@ -320,10 +309,10 @@ jobs:
               with:
                   name: Cef-Release
                   path: build/Cef
-            - name: Download Cef-html artifacts
+            - name: Download html artifacts
               uses: actions/download-artifact@v8
               with:
-                  name: Cef-html
+                  name: html
                   path: build/Cef/html
 
             - name: Make zip
