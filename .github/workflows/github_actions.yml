@@ -182,7 +182,7 @@ jobs:
             - uses: actions/cache@v5
               with:
                   path: ~/.nuget/packages
-                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/Dotnet/VRCX-Electron.csproj') }}-${{ hashFiles('**/Dotnet/VRCX-Electron-arm64.csproj') }}
+                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/Dotnet/VRCX-Electron.csproj') }}
                   restore-keys: |
                       ${{ runner.os }}-nuget-
             - name: Build Electron x64 .NET Application
@@ -222,7 +222,7 @@ jobs:
                   rm -R build/Electron
 
             - name: Build Electron arm64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron-arm64.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64
+              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64
             - name: Build arm64 AppImage
               run: npm run build-electron-arm64
             - name: Upload Electron arm64 AppImage artifacts
@@ -247,7 +247,7 @@ jobs:
             - uses: actions/cache@v5
               with:
                   path: ~/.nuget/packages
-                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/Dotnet/VRCX-Electron.csproj') }}-${{ hashFiles('**/Dotnet/VRCX-Electron-arm64.csproj') }}
+                  key: ${{ runner.os }}-nuget-${{ hashFiles('**/Dotnet/VRCX-Electron.csproj') }}
                   restore-keys: |
                       ${{ runner.os }}-nuget-
             - name: Build Electron x64 .NET Application
@@ -287,7 +287,7 @@ jobs:
                   rm -R build/Electron
 
             - name: Build Electron arm64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron-arm64.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64
+              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64
             - name: Build arm64 macOS .dmg
               run: npm run build-electron-arm64
             - name: Upload arm64 Electron macOS artifacts
