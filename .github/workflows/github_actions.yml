@@ -82,7 +82,7 @@ jobs:
                   cat Version
 
             - name: Build Cef .NET Application
-              run: dotnet build Dotnet/VRCX-Cef.csproj -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:PlatformTarget=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64 --self-contained
+              run: dotnet build Dotnet/VRCX-Cef.csproj -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -t:"Clean;Build" -maxcpucount --runtime win-x64 --self-contained
             - name: Check if we want to sign
               id: check_sign
               run: |
@@ -185,8 +185,8 @@ jobs:
                   key: ${{ runner.os }}-nuget-${{ hashFiles('**/Dotnet/VRCX-Electron.csproj') }}
                   restore-keys: |
                       ${{ runner.os }}-nuget-
-            - name: Build Electron x64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:PlatformTarget=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64
+            - name: Build Electron linux x64 .NET Application
+              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -t:"Clean;Build" -maxcpucount --runtime linux-x64
             - name: Node.js
               uses: actions/setup-node@v6
               with:
@@ -211,7 +211,7 @@ jobs:
                   path: build/html
             - name: Build x64 AppImage
               run: npm run build-electron
-            - name: Upload Electron x64 AppImage artifacts
+            - name: Upload Electron linux x64 dotnet artifacts
               uses: actions/upload-artifact@v7
               with:
                   name: Electron-AppImage-x64
@@ -221,11 +221,11 @@ jobs:
               run: |
                   rm -R build/Electron
 
-            - name: Build Electron arm64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64
+            - name: Build Electron linux arm64 .NET Application
+              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -t:"Clean;Build" -maxcpucount --runtime linux-arm64
             - name: Build arm64 AppImage
               run: npm run build-electron-arm64
-            - name: Upload Electron arm64 AppImage artifacts
+            - name: Upload Electron linux arm64 dotnet artifacts
               uses: actions/upload-artifact@v7
               with:
                   name: Electron-AppImage-arm64
@@ -250,8 +250,8 @@ jobs:
                   key: ${{ runner.os }}-nuget-${{ hashFiles('**/Dotnet/VRCX-Electron.csproj') }}
                   restore-keys: |
                       ${{ runner.os }}-nuget-
-            - name: Build Electron x64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -p:PlatformTarget=x64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a x64
+            - name: Build Electron osx x64 .NET Application
+              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=x64 -t:"Clean;Build" -maxcpucount --runtime osx-x64
             - name: Use Node.js
               uses: actions/setup-node@v6
               with:
@@ -276,7 +276,7 @@ jobs:
                   path: build/html
             - name: Build x64 macOS .dmg
               run: npm run build-electron
-            - name: Upload x64 Electron macOS artifacts
+            - name: Upload Electron osx x64 .NET artifacts
               uses: actions/upload-artifact@v7
               with:
                   name: Electron-MacDmg-x64
@@ -286,11 +286,11 @@ jobs:
               run: |
                   rm -R build/Electron
 
-            - name: Build Electron arm64 .NET Application
-              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -p:PlatformTarget=arm64 -p:RestorePackagesConfig=true -t:"Restore;Clean;Build" -m -a arm64
+            - name: Build Electron osx arm64 .NET Application
+              run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=arm64 -t:"Clean;Build" -maxcpucount --runtime osx-arm64
             - name: Build arm64 macOS .dmg
               run: npm run build-electron-arm64
-            - name: Upload arm64 Electron macOS artifacts
+            - name: Upload Electron osx arm64 dotnet artifacts
               uses: actions/upload-artifact@v7
               with:
                   name: Electron-MacDmg-arm64
