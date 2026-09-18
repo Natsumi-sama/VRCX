@@ -107,6 +107,7 @@
     import { RangeCalendar } from '../../components/ui/range-calendar';
     import { Toggle } from '../../components/ui/toggle';
     import { columns as baseColumns } from './columns.jsx';
+    import { createLocalRowId } from '../../lib/table/createLocalRowId';
     import { useVrcxVueTable } from '../../lib/table/useVrcxVueTable';
 
     const { feedTable, feedTableData } = storeToRefs(useFeedStore());
@@ -152,6 +153,7 @@
     const feedRef = ref(null);
 
     const pageSizes = computed(() => appearanceSettingsStore.tablePageSizes);
+    const getLocalRowId = createLocalRowId();
 
     /**
      * @param row
@@ -160,13 +162,7 @@
         if (row?.id != null) return `id:${row.id}:${row?.type ?? ''}`;
         if (row?.rowId != null) return `row:${row.rowId}:${row?.type ?? ''}`;
 
-        const type = row?.type ?? '';
-        const createdAt = row?.created_at ?? row?.createdAt ?? '';
-        const userId = row?.userId ?? row?.senderUserId ?? '';
-        const location = row?.location ?? row?.details?.location ?? '';
-        const message = row?.message ?? '';
-
-        return `${type}:${createdAt}:${userId}:${location}:${message}:${Date.now()}`;
+        return getLocalRowId(row);
     }
 
     const { table, pagination } = useVrcxVueTable({
