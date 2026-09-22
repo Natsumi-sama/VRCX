@@ -1,5 +1,5 @@
 name: "Build Electron"
-description: "Build Electron"
+description: "Build Electron .NET files for packaging in the calling job"
 inputs:
   vrcx-version:
     description: "VRCX version number"
@@ -35,8 +35,3 @@ runs:
     - name: Build Electron dotnet ${{ inputs.runtime-identifier }} Application
       shell: pwsh
       run: dotnet build 'Dotnet/VRCX-Electron.csproj' -p:Configuration=Release -p:WarningLevel=0 -p:Platform=${{ inputs.platform }} -t:"Clean;Build" -maxcpucount --runtime ${{ inputs.runtime-identifier }}
-    - name: Upload Electron dotnet ${{ inputs.runtime-identifier }} artifacts
-      uses: actions/upload-artifact@v7
-      with:
-        name: Electron-Release_${{ inputs.runtime-identifier }}
-        path: build/Electron
