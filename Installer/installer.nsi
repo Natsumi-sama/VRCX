@@ -34,7 +34,7 @@
 
     Unicode True
     Name "VRCX"
-    OutFile "VRCX_Setup.exe"
+    OutFile "VRCX_Setup_x64.exe"
     InstallDir "$PROGRAMFILES64\VRCX"
     InstallDirRegKey HKLM "Software\VRCX" "InstallDir"
     RequestExecutionLevel admin
